@@ -1,8 +1,7 @@
 vim.g.mapleader = " "
-vim.g.maplocalleader = " "
 
 -- Set to true if you have a Nerd Font installed
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -173,6 +172,13 @@ require("lazy").setup({
 		end,
 	},
 	{
+		"mbbill/undotree",
+		config = function()
+			vim.keymap.set("n", "<leader>u", vim.cmd.UndotreeToggle)
+		end,
+	},
+
+	{
 		"folke/noice.nvim",
 		event = "VeryLazy",
 		opts = {},
@@ -194,6 +200,11 @@ require("lazy").setup({
 					inc_rename = true,
 					lsp_doc_border = true,
 				},
+			})
+			require("notify").setup({
+				on_open = function(win)
+					vim.api.nvim_win_set_config(win, { focusable = false })
+				end,
 			})
 		end,
 	},
@@ -218,7 +229,6 @@ require("lazy").setup({
 			end, { desc = "Hop" })
 		end,
 	},
-
 	-- NOTE: Plugins can also be added by using a table,
 	-- with the first argument being the link and the following
 	-- keys can be used to configure plugin behavior/loading/etc.
@@ -666,13 +676,25 @@ require("lazy").setup({
 			--  into multiple repos for maintenance purposes.
 			"hrsh7th/cmp-nvim-lsp",
 			"hrsh7th/cmp-path",
+			"hrsh7th/cmp-cmdline",
 		},
 		config = function()
 			-- See `:help cmp`
 			local cmp = require("cmp")
 			local luasnip = require("luasnip")
 			luasnip.config.setup({})
-
+			cmp.setup.cmdline(":", {
+				mapping = cmp.mapping.preset.cmdline(),
+				source = cmp.config.sources({
+					{ name = "path" },
+				}),
+				{
+					{
+						name = "cmdline",
+						option = { ignore_cmds = { "Man", "!" } },
+					},
+				},
+			})
 			cmp.setup({
 				snippet = {
 					expand = function(args)
@@ -697,7 +719,7 @@ require("lazy").setup({
 					-- Accept ([y]es) the completion.
 					--  This will auto-import if your LSP supports it.
 					--  This will expand snippets if the LSP sent a snippet.
-					["<Tab>"] = cmp.mapping.confirm({ select = true }),
+					["<CR>"] = cmp.mapping.confirm({ select = true }),
 
 					-- Manually trigger a completion from nvim-cmp.
 					--  Generally you don't need this, because nvim-cmp will display
@@ -776,6 +798,8 @@ require("lazy").setup({
 			-- Set Backgroun to transparent
 			vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
 			vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+			-- vim.api.nvim_set_hl(0, "Normal", { guibg = "rgba(0, 0, 0, 0.8)" })
+			-- vim.api.nvim_set_hl(0, "NormalFloat", { guibg = "rgba(0, 0, 0, 0.8)" })
 			vim.api.nvim_set_hl(0, "LineNr", { fg = "#7f7f7f" })
 
 			-- You can configure highlights by doing something like:
@@ -826,6 +850,31 @@ require("lazy").setup({
 
 			-- ... and there is more!
 			--  Check out: https://github.com/echasnovski/mini.nvim
+		end,
+	},
+	{
+		"mfussenegger/nvim-dap-python",
+		ft = "python",
+		dependencies = {
+			"mfussenegger/nvim-dap",
+		},
+	},
+	{
+		"rcarriga/nvim-dap-ui",
+		dependencies = "mfussenegger/nvim-dap",
+		config = function()
+			local dap = require("dap")
+			local dapui = require("dapui")
+			dapui.setup()
+			dap.listeners.after.event_initialized["dapui_config"] = function()
+				dap.open()
+			end
+			dap.listeners.before.event_terminated["dapui_config"] = function()
+				dapui.close()
+			end
+			dap.listeners.before.event_exited["dapui_config"] = function()
+				dapui.close()
+			end
 		end,
 	},
 	{ -- Highlight, edit, and navigate code
