@@ -1,2 +1,1 @@
-require("wilsonchen.remap")
-require("wilsonchen.color")
+require("wilsonchen.debug")

@@ -8,7 +8,11 @@ vim.g.have_nerd_font = true
 -- NOTE: You can change these options as you wish!
 --  For more options, you can see `:help option-list`
 
--- Make line numbers default
+-- Custom Tab behavior
+vim.opt.tabstop = 4 -- A TAB character looks like 4 spaces
+vim.opt.expandtab = true -- Pressing the TAB key will insert spaces instead of a TAB character
+vim.opt.softtabstop = 4 -- Number of spaces inserted instead of a TAB character
+vim.opt.shiftwidth = 4 -- Number of spaces inserted when indenting-- Make line numbers default
 vim.opt.number = true
 vim.opt.relativenumber = true
 -- You can also add relative line numbers, to help with jumping.
@@ -148,6 +152,7 @@ require("lazy").setup({
 	"jiangmiao/auto-pairs",
 	"Mofiqul/dracula.nvim",
 	"BurntSushi/ripgrep",
+	"sharkdp/fd",
 	{
 		"goolord/alpha-nvim",
 		dependencies = {
@@ -405,7 +410,6 @@ require("lazy").setup({
 			end, { desc = "[S]earch [N]eovim files" })
 		end,
 	},
-
 	{ -- LSP Configuration & Plugins
 		"neovim/nvim-lspconfig",
 		dependencies = {
@@ -417,6 +421,7 @@ require("lazy").setup({
 			-- Useful status updates for LSP.
 			-- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
 			{ "j-hui/fidget.nvim", opts = {} },
+
 			-- `neodev` configures Lua LSP for your Neovim config, runtime and plugins
 			-- used for completion, annotations and signatures of Neovim apis
 			{ "folke/neodev.nvim", opts = {} },
@@ -494,7 +499,7 @@ require("lazy").setup({
 
 					-- Rename the variable under your cursor.
 					--  Most Language Servers support renaming across files, etc.
-					map("<F2>", vim.lsp.buf.rename, "[R]e[n]ame")
+					map("<leader>rn", vim.lsp.buf.rename, "[R]e[n]ame")
 
 					-- Execute a code action, usually your cursor needs to be on top of an error
 					-- or a suggestion from your LSP for this to activate.
@@ -502,11 +507,12 @@ require("lazy").setup({
 
 					-- Opens a popup that displays documentation about the word under your cursor
 					--  See `:help K` for why this keymap.
-					map("gh", vim.lsp.buf.hover, "Hover Documentation")
+					map("<leader>gh", vim.lsp.buf.hover, "Hover Documentation")
 
 					-- WARN: This is not Goto Definition, this is Goto Declaration.
 					--  For example, in C this would take you to the header.
 					map("gD", vim.lsp.buf.declaration, "[G]oto [D]eclaration")
+
 					-- The following two autocommands are used to highlight references of the
 					-- word under your cursor when your cursor rests there for a little while.
 					--    See `:help CursorHold` for information about when this is executed
@@ -545,8 +551,8 @@ require("lazy").setup({
 			--        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
 			local servers = {
 				-- clangd = {},
-				gopls = {},
-				pyright = {},
+				-- gopls = {},
+				-- pyright = {},
 				-- rust_analyzer = {},
 				-- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
 				--
@@ -603,7 +609,22 @@ require("lazy").setup({
 			})
 		end,
 	},
-
+	-- {
+	-- 	"mfussenegger/nvim-dap",
+	-- 	config = function()
+	-- 		local dap = require("nvim-dap")
+	-- 		dap.configurations = {
+	-- 			python = {
+	-- 				type = "python",
+	-- 				request = "launch",
+	-- 				name = "launch file",
+	-- 				program = "${file}",
+	-- 				pythonPath = "python",
+	-- 				cwd = "/",
+	-- 			},
+	-- 		}
+	-- 	end,
+	-- { "mfussenegger/nvim-dap-python" },
 	{ -- Autoformat
 		"stevearc/conform.nvim",
 		lazy = false,
@@ -852,31 +873,6 @@ require("lazy").setup({
 			--  Check out: https://github.com/echasnovski/mini.nvim
 		end,
 	},
-	{
-		"mfussenegger/nvim-dap-python",
-		ft = "python",
-		dependencies = {
-			"mfussenegger/nvim-dap",
-		},
-	},
-	{
-		"rcarriga/nvim-dap-ui",
-		dependencies = "mfussenegger/nvim-dap",
-		config = function()
-			local dap = require("dap")
-			local dapui = require("dapui")
-			dapui.setup()
-			dap.listeners.after.event_initialized["dapui_config"] = function()
-				dap.open()
-			end
-			dap.listeners.before.event_terminated["dapui_config"] = function()
-				dapui.close()
-			end
-			dap.listeners.before.event_exited["dapui_config"] = function()
-				dapui.close()
-			end
-		end,
-	},
 	{ -- Highlight, edit, and navigate code
 		"nvim-treesitter/nvim-treesitter",
 		build = ":TSUpdate",
@@ -917,7 +913,7 @@ require("lazy").setup({
 	--  Here are some example plugins that I've included in the Kickstart repository.
 	--  Uncomment any of the lines below to enable them (you will need to restart nvim).
 	--
-	-- require 'kickstart.plugins.debug',
+	require("kickstart.plugins.debug"),
 	-- require 'kickstart.plugins.indent_line',
 	-- require 'kickstart.plugins.lint',
 
