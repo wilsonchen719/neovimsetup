@@ -301,7 +301,7 @@ require("lazy").setup({
 
 	-- NOTE: Plugins can specify dependencies.
 	--
-	-- The dependencies are proper plugin specifications as well - anything
+	-- The dependencies are proper plugin specificeations as well - anything
 	-- you do for a plugin at the top level, you can do for a dependency.
 	--
 	-- Use the `dependencies` key to specify the dependencies of a particular plugin
@@ -609,22 +609,9 @@ require("lazy").setup({
 			})
 		end,
 	},
-	-- {
-	-- 	"mfussenegger/nvim-dap",
-	-- 	config = function()
-	-- 		local dap = require("nvim-dap")
-	-- 		dap.configurations = {
-	-- 			python = {
-	-- 				type = "python",
-	-- 				request = "launch",
-	-- 				name = "launch file",
-	-- 				program = "${file}",
-	-- 				pythonPath = "python",
-	-- 				cwd = "/",
-	-- 			},
-	-- 		}
-	-- 	end,
-	-- { "mfussenegger/nvim-dap-python" },
+	{
+		"ofirgall/goto-breakpoints.nvim",
+	},
 	{ -- Autoformat
 		"stevearc/conform.nvim",
 		lazy = false,
@@ -811,19 +798,19 @@ require("lazy").setup({
 		-- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
 		"folke/tokyonight.nvim",
 		priority = 1000, -- Make sure to load this before all the other start plugins.
+		--
+		-- init = function()
+		-- 	-- Load the colorscheme here.
+		-- 	-- Like many other themes, this one has different styles, and you could load
+		-- 	-- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
+		-- 	-- Set Backgroun to transparent
+		no_italic = true,
+		no_bold = true,
 		init = function()
-			-- Load the colorscheme here.
-			-- Like many other themes, this one has different styles, and you could load
-			-- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-			vim.cmd.colorscheme("tokyonight-night")
-			-- Set Backgroun to transparent
+			vim.cmd.colorscheme("tokyonight-moon")
 			vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
 			vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
-			-- vim.api.nvim_set_hl(0, "Normal", { guibg = "rgba(0, 0, 0, 0.8)" })
-			-- vim.api.nvim_set_hl(0, "NormalFloat", { guibg = "rgba(0, 0, 0, 0.8)" })
 			vim.api.nvim_set_hl(0, "LineNr", { fg = "#7f7f7f" })
-
-			-- You can configure highlights by doing something like:
 			vim.cmd.hi("Comment gui=none")
 		end,
 	},

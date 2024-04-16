@@ -16,6 +16,8 @@ return {
 
 		-- Required dependency for nvim-dap-ui
 		"nvim-neotest/nvim-nio",
+		-- Plugins for better debuggin experience like jumping btw breakpoints
+		"ofirgall/goto-breakpoints.nvim",
 
 		-- Installs the debug adapters for you
 		"williamboman/mason.nvim",
@@ -26,10 +28,11 @@ return {
 		"mfussenegger/nvim-dap-python",
 	},
 	config = function(_, opts)
-		local dapui = require("dapui")
-		--local path = "C:\\Users\\wilsonchen\\AppData\\Local\\anaconda3"
 		require("mason-nvim-dap").setup(opts)
 		local dap = require("dap")
+		local dapui = require("dapui")
+		local goto = require("goto-breakpoints")
+		local pythonpath = vim.fn.exepath("python")
 		--{
 		-- -- Makes a best effort to setup the various debuggers with
 		-- -- reasonable debug configurations
@@ -66,8 +69,8 @@ return {
 			else
 				cb({
 					type = "executable",
-					command = "C:\\Users\\wilsonchen\\AppData\\Local\\anaconda3\\pythonw.exe",
-					args = { "-m", "debugpy.adapters" },
+					command = pythonpath,
+					args = { "-m", "debugpy.adapter" },
 					options = {
 						source_filetype = "python",
 					},
@@ -77,22 +80,24 @@ return {
 		dap.configurations.python = {
 			{
 				-- The first three options are required by nvim-dap
-				type = "python", -- the type established the link to the adapter definition:
+				type = "python", -- the type here established the link to the adapter definition: `dap.adapters.python`
 				request = "launch",
-				name = "Launch File",
+				name = "Launch file",
+
 				-- Options below are for debugpy, see https://github.com/microsoft/debugpy/wiki/Debug-configuration-settings for supported options
-				program = "${file}", -- This configuration will lauch the current file if used
+
+				program = "${file}", -- This configuration will launch the current file if used.
 				pythonPath = function()
-					--debubpy supports lauching an application with a different intepereter then  the one used lauch debugpy itself.
-					--The code below looks for a `venv` or `.venv` folder in the current direclty and uses Python within.
-					-- You can adapt this - to for example use the `VIRTUAL_ENV` environment variable.
+					-- debugpy supports launching an application with a different interpreter then the one used to launch debugpy itself.
+					-- The code below looks for a `venv` or `.venv` folder in the current directly and uses the python within.
+					-- You could adapt this - to for example use the `VIRTUAL_ENV` environment variable.
 					local cwd = vim.fn.getcwd()
 					if vim.fn.executable(cwd .. "/venv/Scripts/pythonw.exe") == 1 then
-						return cwd .. "/venv/Scripts/pythonw.exe"
+						return pythonpath
 					elseif vim.fn.executable(cwd .. "/.venv/Scripts/pythonw.exe") == 1 then
-						return cwd .. "/.venv/Scripts/pythonw.exe"
+						return pythonpath
 					else
-						return "C:\\Users\\wilsonchen\\AppData\\Local\\anaconda3\\pythonw.exe"
+						return pythonpath
 					end
 				end,
 			},
@@ -102,11 +107,11 @@ return {
 		vim.keymap.set("n", "<F5>", function()
 			dap.continue()
 		end, { desc = "Debug: Start/Continue" })
-		vim.keymap.set("n", "<F1>", dap.step_into, { desc = "Debug: Step Into" })
-		vim.keymap.set("n", "<F2>", dap.step_over, { desc = "Debug: Step Over" })
-		vim.keymap.set("n", "<F3>", dap.step_out, { desc = "Debug: Step Out" })
-		vim.keymap.set("n", "<leader>b", dap.toggle_breakpoint, { desc = "Debug: Toggle Breakpoint" })
-		vim.keymap.set("n", "<leader>B", function()
+		vim.keymap.set("n", "<F2>", dap.step_into, { desc = "Debug: Step Into" })
+		vim.keymap.set("n", "<F3>", goto.next, { desc = "Debug: Jump Breakpoint" })
+		vim.keymap.set("n", "<F4>", goto.stopped, { desc = "Debug: Jump To Stopped Line" })
+		vim.keymap.set("n", "<F9>", dap.toggle_breakpoint, { desc = "Debug: Toggle Breakpoint" })
+		vim.keymap.set("n", "<F8>", function()
 			dap.set_breakpoint(vim.fn.input("Breakpoint condition: "))
 		end, { desc = "Debug: Set Breakpoint" })
 
@@ -117,23 +122,17 @@ return {
 			--    Feel free to remove or use ones that you like more! :)
 			--    Don't feel like these are good choices.
 			icons = { expanded = "▾", collapsed = "▸", current_frame = "*" },
-			controls = {
-				icons = {
-					pause = "⏸",
-					play = "▶",
-					step_into = "⏎",
-					step_over = "⏭",
-					step_out = "⏮",
-					step_back = "b",
-					run_last = "▶▶",
-					terminate = "⏹",
-					disconnect = "⏏",
-				},
-			},
 		})
 
 		-- Toggle to see last session result. Without this, you can't see session output in case of unhandled exception.
 		vim.keymap.set("n", "<F7>", dapui.toggle, { desc = "Debug: See last session result." })
+		
+		-- Reset debugger icons
+		local sign = vim.fn.sign_define
+		sign("DapBreakpoint", { text = "●", texthl = "DapBreakpoint", linehl = "", numhl = ""})
+		sign("DapBreakpointCondition", { text = "●", texthl = "DapBreakpointCondition", linehl = "", numhl = ""})
+		sign("DapLogPoint", { text = "◆", texthl = "DapLogPoint", linehl = "", numhl = ""})
+		sign('DapStopped', { text='', texthl='DapStopped', linehl='DapStopped', numhl= 'DapStopped' })
 
 		dap.listeners.after.event_initialized["dapui_config"] = dapui.open
 		dap.listeners.before.event_terminated["dapui_config"] = dapui.close
