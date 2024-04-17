@@ -97,6 +97,7 @@ return {
 					elseif vim.fn.executable(cwd .. "/.venv/Scripts/pythonw.exe") == 1 then
 						return pythonpath
 					else
+						-- Please modify your code here to auto-select initial program
 						return pythonpath
 					end
 				end,

@@ -1,4 +1,5 @@
 vim.g.mapleader = " "
+-- testing our my new function
 
 -- Set to true if you have a Nerd Font installed
 vim.g.have_nerd_font = true
@@ -7,7 +8,6 @@ vim.g.have_nerd_font = true
 -- See `:help vim.opt`
 -- NOTE: You can change these options as you wish!
 --  For more options, you can see `:help option-list`
-
 -- Custom Tab behavior
 vim.opt.tabstop = 4 -- A TAB character looks like 4 spaces
 vim.opt.expandtab = true -- Pressing the TAB key will insert spaces instead of a TAB character
@@ -15,6 +15,8 @@ vim.opt.softtabstop = 4 -- Number of spaces inserted instead of a TAB character
 vim.opt.shiftwidth = 4 -- Number of spaces inserted when indenting-- Make line numbers default
 vim.opt.number = true
 vim.opt.relativenumber = true
+vim.opt.colorcolumn = "120"
+vim.opt.textwidth = 120
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
 -- vim.opt.relativenumber = true
@@ -45,7 +47,7 @@ vim.opt.undofile = true
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
 
--- Keep signcolumn on by default
+--Keep signcolumn on by default
 vim.opt.signcolumn = "yes"
 
 -- Decrease update time
@@ -111,10 +113,10 @@ vim.keymap.set("n", "<C-j>", "<C-w><C-j>", { desc = "Move focus to the lower win
 vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
 vim.keymap.set("n", "<leader>pv", vim.cmd.Ex, { desc = "Explorer View" })
 
--- [[ Basic Autocommands ]]
---  See `:help lua-guide-autocommands`
+-- [[ Basic Autocommands ]
+--  See `:help lua-guide-`
 
--- Highlight when yanking (copying) text
+-- Highlight when yanking (copying)
 --  Try it with `yap` in normal mode
 --  See `:help vim.highlight.on_yank()`
 vim.api.nvim_create_autocmd("TextYankPost", {
@@ -124,7 +126,6 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 		vim.highlight.on_yank()
 	end,
 })
-
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -150,8 +151,21 @@ require("lazy").setup({
 	-- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
 	"tpope/vim-sleuth", -- Detect tabstop and shiftwidth automatically
 	"jiangmiao/auto-pairs",
-	"Mofiqul/dracula.nvim",
 	"BurntSushi/ripgrep",
+	{
+		"smithbm2316/centerpad.nvim",
+		config = function()
+			vim.keymap.set(
+				"n",
+				"<leader>z",
+				"<cmd>lua require('centerpad').toggle{ leftpad = 30, rightpad = 20 }<cr>",
+				{ silent = true, noremap = true, desc = "Center Editor" }
+			)
+			if next(vim.fn.argv()) ~= nil then
+				vim.cmd("Centerpad 30")
+			end
+		end,
+	},
 	"sharkdp/fd",
 	{
 		"goolord/alpha-nvim",
@@ -182,7 +196,23 @@ require("lazy").setup({
 			vim.keymap.set("n", "<leader>u", vim.cmd.UndotreeToggle)
 		end,
 	},
+	{
+		"linux-cultist/venv-selector.nvim",
+		dependencies = { "neovim/nvim-lspconfig", "nvim-telescope/telescope.nvim", "mfussenegger/nvim-dap-python" },
+		opts = {
+			-- Your options go here
+			-- name = "venv",
+			-- auto_refresh = false
+		},
 
+		event = "VeryLazy", -- Optional: needed only if you want to type `:VenvSelect` without a keymapping
+		keys = {
+			-- Keymap to open VenvSelector to pick a venv.
+			{ "<leader>vs", "<cmd>VenvSelect<cr>" },
+			-- Keymap to retrieve the venv from a cache (the one previously used for the same project directory).
+			{ "<leader>vc", "<cmd>VenvSelectCached<cr>" },
+		},
+	},
 	{
 		"folke/noice.nvim",
 		event = "VeryLazy",
@@ -372,12 +402,12 @@ require("lazy").setup({
 			-- Enable Telescope extensions if they are installed
 			pcall(require("telescope").load_extension, "fzf")
 			pcall(require("telescope").load_extension, "ui-select")
-
 			-- See `:help telescope.builtin`
 			local builtin = require("telescope.builtin")
 			vim.keymap.set("n", "<leader>sh", builtin.help_tags, { desc = "[S]earch [H]elp" })
 			vim.keymap.set("n", "<leader>sk", builtin.keymaps, { desc = "[S]earch [K]eymaps" })
 			vim.keymap.set("n", "<leader>sf", builtin.find_files, { desc = "[S]earch [F]iles" })
+			vim.keymap.set("n", "<leader>sg", builtin.git_files, { desc = "[S]earch [G]it File" })
 			--vim.keymap.set("n", "<leader>ss", builtin.builtin, { desc = "[S]earch [S]elect Telescope" })
 			vim.keymap.set("n", "<leader>sw", builtin.grep_string, { desc = "[S]earch current [W]ord" })
 			vim.keymap.set("n", "<leader>sg", builtin.live_grep, { desc = "[S]earch by [G]rep" })
@@ -791,31 +821,95 @@ require("lazy").setup({
 			})
 		end,
 	},
-	{ -- You can easily change to a different colorscheme.
-		-- Change the name of the colorscheme plugin below, and then
-		-- change the command in the config to whatever the name of that colorscheme is.
-		--
-		-- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-		"folke/tokyonight.nvim",
-		priority = 1000, -- Make sure to load this before all the other start plugins.
-		--
-		-- init = function()
-		-- 	-- Load the colorscheme here.
-		-- 	-- Like many other themes, this one has different styles, and you could load
-		-- 	-- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-		-- 	-- Set Backgroun to transparent
-		no_italic = true,
-		no_bold = true,
-		init = function()
-			vim.cmd.colorscheme("tokyonight-moon")
+	-- { -- You can easily change to a different colorscheme.
+	-- 	-- Change the name of the colorscheme plugin below, and then
+	-- 	-- change the command in the config to whatever the name of that colorscheme is.
+	-- 	--
+	-- 	-- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
+	-- 	"folke/tokyonight.nvim",
+	-- 	priority = 1000, -- Make sure to load this before all the other start plugins.
+	-- 	--
+	-- 	-- init = function()
+	-- 	-- 	-- Load the colorscheme here.
+	-- 	-- 	-- Like many other themes, this one has different styles, and you could load
+	-- 	-- 	-- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
+	-- 	-- 	-- Set Backgroun to transparent
+	-- 	no_italic = true,
+	-- 	no_bold = true,
+	-- 	init = function()
+	-- 		vim.cmd.colorscheme("tokyonight-moon")
+	-- 		vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
+	-- 		vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+	-- 		vim.api.nvim_set_hl(0, "LineNr", { fg = "#7f7f7f" })
+	-- 		vim.cmd.hi("Comment gui=none")
+	-- 	end,
+	-- },
+
+	-- Highlight todo, notes, etc in comments
+	-- ,
+	{
+		"Mofiqul/dracula.nvim",
+		opts = { colorscheme = "dracula" },
+		config = function()
+			local dracula = require("dracula")
+			dracula.setup({
+				-- customize dracula color palette
+				colors = {
+					bg = "#282A36",
+					fg = "#F8F8F2",
+					selection = "#44475A",
+					comment = "#6272A4",
+					red = "#FF5555",
+					orange = "#FFB86C",
+					yellow = "#F1FA8C",
+					green = "#50fa7b",
+					purple = "#BD93F9",
+					cyan = "#8BE9FD",
+					pink = "#FF79C6",
+					bright_red = "#FF6E6E",
+					bright_green = "#69FF94",
+					bright_yellow = "#FFFFA5",
+					bright_blue = "#D6ACFF",
+					bright_magenta = "#FF92DF",
+					bright_cyan = "#A4FFFF",
+					bright_white = "#FFFFFF",
+					menu = "#21222C",
+					visual = "#3E4452",
+					gutter_fg = "#4B5263",
+					nontext = "#3B4048",
+					white = "#ABB2BF",
+					black = "#191A21",
+				},
+				-- show the '~' characters after the end of buffers
+				show_end_of_buffer = true, -- default false
+				-- use transparent background
+				transparent_bg = false, -- default false
+				-- set custom lualine background color
+				lualine_bg_color = "#44475a", -- default nil
+				-- set italic comment
+				italic_comment = true, -- default false
+				-- overrides the default highlights with table see `:h synIDattr`
+				overrides = {},
+				-- You can use overrides as table like this
+				-- overrides = {
+				--   NonText = { fg = "white" }, -- set NonText fg to white
+				--   NvimTreeIndentMarker = { link = "NonText" }, -- link to NonText highlight
+				--   Nothing = {} -- clear highlight of Nothing
+				-- },
+				-- Or you can also use it like a function to get color from theme
+				-- overrides = function (colors)
+				--   return {
+				--     NonText = { fg = colors.white }, -- set NonText fg to white of theme
+				--   }
+				-- end,
+			})
+			vim.cmd.colorscheme("dracula")
 			vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
 			vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
 			vim.api.nvim_set_hl(0, "LineNr", { fg = "#7f7f7f" })
 			vim.cmd.hi("Comment gui=none")
 		end,
 	},
-
-	-- Highlight todo, notes, etc in comments
 	{
 		"folke/todo-comments.nvim",
 		event = "VimEnter",
