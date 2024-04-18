@@ -98,7 +98,10 @@ return {
 						return pythonpath
 					else
 						-- Please modify your code here to auto-select initial program
-						return pythonpath
+						local current_env_python = os.getenv('CONDA_DEFAULT_ENV')
+						print(current_env_python)
+						print("C:\\Users\\wilsonchen\\AppData\\Local\\anaconda3\\envs\\" .. current_env_python .. "\\python.exe")
+						return "C:\\Users\\wilsonchen\\AppData\\Local\\anaconda3\\envs\\" .. current_env_python .. "\\python.exe"
 					end
 				end,
 			},

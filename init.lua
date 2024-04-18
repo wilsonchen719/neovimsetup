@@ -1,6 +1,4 @@
 vim.g.mapleader = " "
--- testing our my new function
-
 -- Set to true if you have a Nerd Font installed
 vim.g.have_nerd_font = true
 -- [[ Setting options ]]
@@ -64,7 +62,7 @@ vim.opt.splitbelow = true
 --  See `:help 'list'`
 --  and `:help 'listchars'`
 vim.opt.list = true
-vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
+vim.opt.listchars = { tab = "│ ", trail = "·", nbsp = "␣" }
 
 -- Preview substitutions live, as you type!
 vim.opt.inccommand = "split"
@@ -153,6 +151,7 @@ require("lazy").setup({
 	"BurntSushi/ripgrep",
 	{
 		"wilsonchen719/centerpad.nvim",
+		event = "VimEnter",
 		config = function()
 			vim.keymap.set(
 				"n",
@@ -166,12 +165,12 @@ require("lazy").setup({
 					vim.cmd("bw rightpad")
 					vim.cmd("wq")
 				else
-					vim.cmd("q")
+					vim.cmd("wq")
 				end
 			end)
-			if next(vim.fn.argv()) ~= nil then
-				vim.cmd("Centerpad 30")
-			end
+			-- if next(vim.fn.argv()) ~= nil then
+			vim.cmd("Centerpad 25")
+			-- end
 		end,
 	},
 	"sharkdp/fd",
@@ -203,23 +202,6 @@ require("lazy").setup({
 		config = function()
 			vim.keymap.set("n", "<leader>u", vim.cmd.UndotreeToggle)
 		end,
-	},
-	{
-		"linux-cultist/venv-selector.nvim",
-		dependencies = { "neovim/nvim-lspconfig", "nvim-telescope/telescope.nvim", "mfussenegger/nvim-dap-python" },
-		opts = {
-			-- Your options go here
-			-- name = "venv",
-			-- auto_refresh = false
-		},
-
-		event = "VeryLazy", -- Optional: needed only if you want to type `:VenvSelect` without a keymapping
-		keys = {
-			-- Keymap to open VenvSelector to pick a venv.
-			{ "<leader>vs", "<cmd>VenvSelect<cr>" },
-			-- Keymap to retrieve the venv from a cache (the one previously used for the same project directory).
-			{ "<leader>vc", "<cmd>VenvSelectCached<cr>" },
-		},
 	},
 	{
 		"folke/noice.nvim",
@@ -1073,63 +1055,89 @@ require("lazy").setup({
 
 	-- Highlight todo, notes, etc in comments
 	-- ,
+	-- {
+	-- 	"Mofiqul/dracula.nvim",
+	-- 	opts = { colorscheme = "dracula" },
+	-- 	config = function()
+	-- 		local dracula = require("dracula")
+	-- 		dracula.setup({
+	-- 			-- customize dracula color palette
+	-- 			colors = {
+	-- 				bg = "#282A36",
+	-- 				fg = "#F8F8F2",
+	-- 				selection = "#44475A",
+	-- 				comment = "#6272A4",
+	-- 				red = "#FF5555",
+	-- 				orange = "#FFB86C",
+	-- 				yellow = "#F1FA8C",
+	-- 				green = "#50fa7b",
+	-- 				purple = "#BD93F9",
+	-- 				cyan = "#8BE9FD",
+	-- 				pink = "#FF79C6",
+	-- 				bright_red = "#FF6E6E",
+	-- 				bright_green = "#69FF94",
+	-- 				bright_yellow = "#FFFFA5",
+	-- 				bright_blue = "#D6ACFF",
+	-- 				bright_magenta = "#FF92DF",
+	-- 				bright_cyan = "#A4FFFF",
+	-- 				bright_white = "#FFFFFF",
+	-- 				menu = "#21222C",
+	-- 				visual = "#3E4452",
+	-- 				gutter_fg = "#4B5263",
+	-- 				nontext = "#3B4048",
+	-- 				white = "#ABB2BF",
+	-- 				black = "#191A21",
+	-- 			},
+	-- 			-- show the '~' characters after the end of buffers
+	-- 			show_end_of_buffer = true, -- default false
+	-- 			-- use transparent background
+	-- 			transparent_bg = false, -- default false
+	-- 			-- set custom lualine background color
+	-- 			lualine_bg_color = "#44475a", -- default nil
+	-- 			-- set italic comment
+	-- 			italic_comment = true, -- default false
+	-- 			-- overrides the default highlights with table see `:h synIDattr`
+	-- 			overrides = {},
+	-- 			-- You can use overrides as table like this
+	-- 			-- overrides = {
+	-- 			--   NonText = { fg = "white" }, -- set NonText fg to white
+	-- 			--   NvimTreeIndentMarker = { link = "NonText" }, -- link to NonText highlight
+	-- 			--   Nothing = {} -- clear highlight of Nothing
+	-- 			-- },
+	-- 			-- Or you can also use it like a function to get color from theme
+	-- 			-- overrides = function (colors)
+	-- 			--   return {
+	-- 			--     NonText = { fg = colors.white }, -- set NonText fg to white of theme
+	-- 			--   }
+	-- 			-- end,
+	-- 		})
+	-- 		vim.cmd.colorscheme("dracula")
+	-- 		vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
+	-- 		vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+	-- 		vim.api.nvim_set_hl(0, "LineNr", { fg = "#7f7f7f" })
+	-- 		vim.cmd.hi("Comment gui=none")
+	-- 	end,
+	-- },
 	{
-		"Mofiqul/dracula.nvim",
-		opts = { colorscheme = "dracula" },
+		"AlexvZyl/nordic.nvim",
+		lazy = false,
+		priority = 1000,
 		config = function()
-			local dracula = require("dracula")
-			dracula.setup({
-				-- customize dracula color palette
-				colors = {
-					bg = "#282A36",
-					fg = "#F8F8F2",
-					selection = "#44475A",
-					comment = "#6272A4",
-					red = "#FF5555",
-					orange = "#FFB86C",
-					yellow = "#F1FA8C",
-					green = "#50fa7b",
-					purple = "#BD93F9",
-					cyan = "#8BE9FD",
-					pink = "#FF79C6",
-					bright_red = "#FF6E6E",
-					bright_green = "#69FF94",
-					bright_yellow = "#FFFFA5",
-					bright_blue = "#D6ACFF",
-					bright_magenta = "#FF92DF",
-					bright_cyan = "#A4FFFF",
-					bright_white = "#FFFFFF",
-					menu = "#21222C",
-					visual = "#3E4452",
-					gutter_fg = "#4B5263",
-					nontext = "#3B4048",
-					white = "#ABB2BF",
-					black = "#191A21",
+			local palette = require("nordic.colors")
+			require("nordic").load()
+			require("nordic").setup({
+				override = {
+					TelescopePromptTitle = {
+						fg = palette.red.bright,
+						bg = palette.green.base,
+						italic = true,
+						underline = true,
+						sp = palette.yellow.dim,
+						undercurl = false,
+					},
 				},
-				-- show the '~' characters after the end of buffers
-				show_end_of_buffer = true, -- default false
-				-- use transparent background
-				transparent_bg = false, -- default false
-				-- set custom lualine background color
-				lualine_bg_color = "#44475a", -- default nil
-				-- set italic comment
-				italic_comment = true, -- default false
-				-- overrides the default highlights with table see `:h synIDattr`
-				overrides = {},
-				-- You can use overrides as table like this
-				-- overrides = {
-				--   NonText = { fg = "white" }, -- set NonText fg to white
-				--   NvimTreeIndentMarker = { link = "NonText" }, -- link to NonText highlight
-				--   Nothing = {} -- clear highlight of Nothing
-				-- },
-				-- Or you can also use it like a function to get color from theme
-				-- overrides = function (colors)
-				--   return {
-				--     NonText = { fg = colors.white }, -- set NonText fg to white of theme
-				--   }
-				-- end,
 			})
-			vim.cmd.colorscheme("dracula")
+			vim.cmd.colorscheme("nordic")
 			vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
 			vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
 			vim.api.nvim_set_hl(0, "LineNr", { fg = "#7f7f7f" })
@@ -1153,7 +1161,6 @@ require("lazy").setup({
 			--  - yinq - [Y]ank [I]nside [N]ext [']quote
 			--  - ci'  - [C]hange [I]nside [']quote
 			require("mini.ai").setup({ n_lines = 500 })
-
 			-- Add/delete/replace surroundings (brackets, quotes, etc.)
 			--
 			-- - saiw) - [S]urround [A]dd [I]nner [W]ord [)]Paren
@@ -1180,6 +1187,7 @@ require("lazy").setup({
 			--  Check out: https://github.com/echasnovski/mini.nvim
 		end,
 	},
+
 	{ -- Highlight, edit, and navigate code
 		"nvim-treesitter/nvim-treesitter",
 		build = ":TSUpdate",
@@ -1210,7 +1218,48 @@ require("lazy").setup({
 			--    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
 		end,
 	},
+	{
+		"lukas-reineke/indent-blankline.nvim",
+		event = "VeryLazy",
+		main = "ibl",
+		opts = {
+			indent = {
+				char = "│",
+				tab_char = "│",
+			},
+			scope = { enabled = false },
+			exclude = {
+				filetypes = {
+					"help",
+					"alpha",
+					"dashboard",
+					"neo-tree",
+					"Trouble",
+					"trouble",
+					"lazy",
+					"mason",
+					"notify",
+					"toggleterm",
+					"lazyterm",
+				},
+			},
+		},
+		config = function()
+			local palette = require("nordic.colors")
+			local highlight = {
+				"nordic_red",
+				-- "RainbowCyan",
+			}
+			local hooks = require("ibl.hooks")
+			hooks.register(hooks.type.HIGHLIGHT_SETUP, function()
+				vim.api.nvim_set_hl(0, "nordic_red", { fg = palette.red.dim })
+				-- vim.api.nvim_set_hl(0, "RainbowCyan", { fg = "#56B6C2" })
+			end)
 
+			require("ibl").setup({ scope = { enabled = true, show_start = true, highlight = highlight } })
+			hooks.register(hooks.type.SCOPE_HIGHLIGHT, hooks.builtin.scope_highlight_from_extmark)
+		end,
+	},
 	-- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
 	-- init.lua. If you want these files, they are in the repository, so you can just download them and
 	-- place them in the correct locations.
