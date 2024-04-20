@@ -84,15 +84,21 @@ vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
 vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Go to previous [D]iagnostic message" })
 vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Go to next [D]iagnostic message" })
 vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Show diagnostic [E]rror messages" })
-vim.keymap.set("n", "<leader>qf", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
+vim.keymap.set("n", "Q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
 -- is not what someone will guess without a bit more experience.
---
 -- NOTE: This won't work in all terminal emulators/tmux/etc. Try your own mapping
 -- or just use <C-\><C-n> to exit terminal mode
 vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
+
+--File Navigation Modification, center
+vim.keymap.set("n", "<C-u>", "<C-u>zz")
+vim.keymap.set("n", "<C-d>", "<C-d>zz")
+vim.keymap.set("n", "n", "nzzzv")
+vim.keymap.set("n", "N", "Nzzzv")
+vim.keymap.set("x", "p", '"_dP')
 
 -- TIP: Disable arrow keys in normal mode
 -- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
@@ -108,8 +114,7 @@ vim.keymap.set("n", "<C-h>", "<C-w><C-h>", { desc = "Move focus to the left wind
 vim.keymap.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move focus to the right window" })
 vim.keymap.set("n", "<C-j>", "<C-w><C-j>", { desc = "Move focus to the lower window" })
 vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
-vim.keymap.set("n", "<leader>pv", "<CMD>Oil<CR>", { desc = "Explorer View" })
-
+vim.keymap.set("n", "<leader>pv", "<cmd>Oil<CR>", { noremap = true, silent = true })
 -- [[ Basic Autocommands ]
 --  See `:help lua-guide-`
 
@@ -155,7 +160,7 @@ require("lazy").setup({
 		config = function()
 			vim.keymap.set(
 				"n",
-				"<leader>z",
+				"<C-z>",
 				"<cmd>lua require('centerpad').toggle{ leftpad = 30, rightpad = 20 }<cr>",
 				{ silent = true, noremap = true, desc = "Center Editor" }
 			)
@@ -169,7 +174,7 @@ require("lazy").setup({
 				end
 			end)
 			-- if next(vim.fn.argv()) ~= nil then
-			vim.cmd("Centerpad 25")
+			vim.cmd("Centerpad 25 20")
 			-- end
 		end,
 	},
@@ -463,7 +468,7 @@ require("lazy").setup({
 					concealcursor = "nvic",
 				},
 				-- Send deleted files to the trash instead of permanently deleting them (:help oil-trash)
-				delete_to_trash = false,
+				delete_to_trash = true,
 				-- Skip the confirmation popup for simple operations (:help oil.skip_confirm_for_simple_edits)
 				skip_confirm_for_simple_edits = false,
 				-- Selecting a new/moved/renamed file or directory will prompt you to save changes first
@@ -540,8 +545,8 @@ require("lazy").setup({
 				float = {
 					-- Padding around the floating window
 					padding = 2,
-					max_width = 0,
-					max_height = 0,
+					max_width = 100,
+					max_height = 100,
 					border = "rounded",
 					win_options = {
 						winblend = 0,
@@ -630,22 +635,36 @@ require("lazy").setup({
 				harpoon:list():add()
 			end)
 			-- vim.keymap.set("n", "<C-h>", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end)
-			vim.keymap.set("n", "<C-i>", function()
+			vim.keymap.set("n", "<leader>1", function()
 				harpoon:list():select(1)
 			end)
-			vim.keymap.set("n", "<C-o>", function()
+			vim.keymap.set("n", "<leader>2", function()
 				harpoon:list():select(2)
 			end)
-			vim.keymap.set("n", "<C-p>", function()
+			vim.keymap.set("n", "<leader>3", function()
 				harpoon:list():select(3)
 			end)
 			-- Toggle previous & next buffers stored within Harpoon list
-			vim.keymap.set("n", "<C-z>", function()
+			vim.keymap.set("n", "<C-PageUp>", function()
 				harpoon:list():prev()
 			end)
-			vim.keymap.set("n", "<C-x>", function()
+			vim.keymap.set("n", "<C-PageDown>", function()
 				harpoon:list():next()
 			end)
+			vim.api.nvim_create_autocmd({ "BufLeave", "ExitPre" }, {
+				pattern = "*",
+				callback = function()
+					local filename = vim.fn.expand("%:p:.")
+					local harpoon_marks = harpoon:list().items
+					for _, mark in ipairs(harpoon_marks) do
+						if mark.value == filename then
+							mark.context.row = vim.fn.line(".")
+							mark.context.col = vim.fn.col(".")
+							return
+						end
+					end
+				end,
+			})
 		end,
 	},
 	{ -- LSP Configuration & Plugins
@@ -898,21 +917,21 @@ require("lazy").setup({
 					-- Build Step is needed for regex support in snippets.
 					-- This step is not supported in many windows environments.
 					-- Remove the below condition to re-enable on windows.
-					if vim.fn.has("win32") == 1 or vim.fn.executable("make") == 0 then
-						return
-					end
+					-- if vim.fn.has("win32") == 1 or vim.fn.executable("make") == 0 then
+					-- 	return
+					-- end
 					return "make install_jsregexp"
 				end)(),
 				dependencies = {
 					-- `friendly-snippets` contains a variety of premade snippets.
 					--    See the README about individual language/framework/plugin snippets:
 					--    https://github.com/rafamadriz/friendly-snippets
-					-- {
-					--   'rafamadriz/friendly-snippets',
-					--   config = function()
-					--     require('luasnip.loaders.from_vscode').lazy_load()
-					--   end,
-					-- },
+					{
+						"rafamadriz/friendly-snippets",
+						config = function()
+							require("luasnip.loaders.from_vscode").lazy_load()
+						end,
+					},
 				},
 			},
 			"saadparwaiz1/cmp_luasnip",
@@ -1029,29 +1048,29 @@ require("lazy").setup({
 			})
 		end,
 	},
-	-- { -- You can easily change to a different colorscheme.
-	-- 	-- Change the name of the colorscheme plugin below, and then
-	-- 	-- change the command in the config to whatever the name of that colorscheme is.
-	-- 	--
-	-- 	-- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-	-- 	"folke/tokyonight.nvim",
-	-- 	priority = 1000, -- Make sure to load this before all the other start plugins.
-	-- 	--
-	-- 	-- init = function()
-	-- 	-- 	-- Load the colorscheme here.
-	-- 	-- 	-- Like many other themes, this one has different styles, and you could load
-	-- 	-- 	-- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-	-- 	-- 	-- Set Backgroun to transparent
-	-- 	no_italic = true,
-	-- 	no_bold = true,
-	-- 	init = function()
-	-- 		vim.cmd.colorscheme("tokyonight-moon")
-	-- 		vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
-	-- 		vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
-	-- 		vim.api.nvim_set_hl(0, "LineNr", { fg = "#7f7f7f" })
-	-- 		vim.cmd.hi("Comment gui=none")
-	-- 	end,
-	-- },
+	{ -- You can easily change to a different colorscheme.
+		-- Change the name of the colorscheme plugin below, and then
+		-- change the command in the config to whatever the name of that colorscheme is.
+		--
+		-- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
+		"folke/tokyonight.nvim",
+		--priority = 1000, -- Make sure to load this before all the other start plugins.
+		--
+		-- init = function()
+		-- 	-- Load the colorscheme here.
+		-- 	-- Like many other themes, this one has different styles, and you could load
+		-- 	-- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
+		-- 	-- Set Backgroun to transparent
+		no_italic = true,
+		no_bold = true,
+		init = function()
+			vim.cmd.colorscheme("tokyonight-moon")
+			vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
+			vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+			vim.api.nvim_set_hl(0, "LineNr", { fg = "#7f7f7f" })
+			vim.cmd.hi("Comment gui=none")
+		end,
+	},
 
 	-- Highlight todo, notes, etc in comments
 	-- ,
@@ -1192,7 +1211,7 @@ require("lazy").setup({
 		"nvim-treesitter/nvim-treesitter",
 		build = ":TSUpdate",
 		opts = {
-			ensure_installed = { "bash", "c", "html", "lua", "luadoc", "markdown", "vim", "vimdoc" },
+			ensure_installed = { "bash", "c", "html", "lua", "luadoc", "markdown", "vim", "vimdoc", "python", "go" },
 			-- Autoinstall languages that are not installed
 			auto_install = true,
 			highlight = {
@@ -1245,21 +1264,23 @@ require("lazy").setup({
 			},
 		},
 		config = function()
-			local palette = require("nordic.colors")
+			-- local palette = require("nordic.colors")
 			local highlight = {
-				"nordic_red",
-				-- "RainbowCyan",
+				-- "nordic_red",
+				"RainbowCyan",
 			}
 			local hooks = require("ibl.hooks")
 			hooks.register(hooks.type.HIGHLIGHT_SETUP, function()
-				vim.api.nvim_set_hl(0, "nordic_red", { fg = palette.red.dim })
-				-- vim.api.nvim_set_hl(0, "RainbowCyan", { fg = "#56B6C2" })
+				-- vim.api.nvim_set_hl(0, "nordic_red", { fg = palette.red.dim })
+				vim.api.nvim_set_hl(0, "RainbowCyan", { fg = "#56B6C2" })
 			end)
 
 			require("ibl").setup({ scope = { enabled = true, show_start = true, highlight = highlight } })
 			hooks.register(hooks.type.SCOPE_HIGHLIGHT, hooks.builtin.scope_highlight_from_extmark)
 		end,
 	},
+	{ "kmontocam/nvim-conda" },
+	{ "tpope/vim-fugitive" },
 	-- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
 	-- init.lua. If you want these files, they are in the repository, so you can just download them and
 	-- place them in the correct locations.
@@ -1271,7 +1292,7 @@ require("lazy").setup({
 	--
 	require("kickstart.plugins.debug"),
 	-- require 'kickstart.plugins.indent_line',
-	-- require 'kickstart.plugins.lint',
+	require("kickstart.plugins.lint"),
 
 	-- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
 	--    This is the easiest way to modularize your config.
