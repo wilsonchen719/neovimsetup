@@ -14,6 +14,8 @@ vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.colorcolumn = "120"
 vim.opt.textwidth = 120
+-- Stop autoindenting next line.
+vim.cmd([[autocmd FileType * set formatoptions-=ro]])
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
 -- vim.opt.relativenumber = true
@@ -32,6 +34,7 @@ vim.opt.showmode = false
 -- Sync clipboard between OS and Neovim.
 --  Remove this option if you want your OS clipboard to remain independent.
 --  See `:help 'clipboard'`
+
 vim.opt.clipboard = "unnamedplus"
 
 -- Enable break indent
@@ -72,6 +75,9 @@ vim.opt.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 10
+
+-- Show only 20 result of auto-complete suggestions.
+vim.opt.pumheight = 20
 
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
@@ -128,6 +134,17 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 		vim.highlight.on_yank()
 	end,
 })
+-- Calling black(autoformat) on save.
+vim.api.nvim_create_augroup("AutoFormat", {})
+vim.api.nvim_create_autocmd("BufWritePost", {
+	pattern = "*.py",
+	group = "AutoFormat",
+	callback = function()
+		vim.cmd("silent !black --quiet %")
+		vim.cmd("edit")
+	end,
+})
+
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -154,6 +171,7 @@ require("lazy").setup({
 	"tpope/vim-sleuth", -- Detect tabstop and shiftwidth automatically
 	"jiangmiao/auto-pairs",
 	"BurntSushi/ripgrep",
+	"dhruvasagar/vim-table-mode",
 	{
 		"wilsonchen719/centerpad.nvim",
 		event = "VimEnter",
@@ -200,12 +218,6 @@ require("lazy").setup({
 				[[                                                                       ]],
 			}
 			alpha.setup(dashboard.opts)
-		end,
-	},
-	{
-		"mbbill/undotree",
-		config = function()
-			vim.keymap.set("n", "<leader>u", vim.cmd.UndotreeToggle)
 		end,
 	},
 	{
@@ -1161,6 +1173,7 @@ require("lazy").setup({
 			vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
 			vim.api.nvim_set_hl(0, "LineNr", { fg = "#7f7f7f" })
 			vim.cmd.hi("Comment gui=none")
+			vim.cmd.hi("Visual guibg=#60728A")
 		end,
 	},
 	{
@@ -1281,6 +1294,25 @@ require("lazy").setup({
 	},
 	{ "kmontocam/nvim-conda" },
 	{ "tpope/vim-fugitive" },
+	{
+		"danymat/neogen",
+		config = function()
+			require("neogen").setup({
+				enabled = true,
+				input_after_comment = true,
+				languages = {
+					python = {
+						template = {
+							annotation_convention = "numpydoc",
+						},
+					},
+				},
+			})
+			vim.keymap.set("n", "<leader>ng", function()
+				vim.cmd("Neogen")
+			end, { desc = "[N]eo[g]en" })
+		end,
+	},
 	-- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
 	-- init.lua. If you want these files, they are in the repository, so you can just download them and
 	-- place them in the correct locations.
@@ -1293,6 +1325,8 @@ require("lazy").setup({
 	require("kickstart.plugins.debug"),
 	-- require 'kickstart.plugins.indent_line',
 	require("kickstart.plugins.lint"),
+	require("wilsonchen.textobject"),
+	require("wilsonchen.undo"),
 
 	-- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
 	--    This is the easiest way to modularize your config.
@@ -1323,3 +1357,6 @@ require("lazy").setup({
 })
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+-- TODO: Research how to integrate git
+-- TODO: Add benlubas/molten-nvim to run python in cell block
+-- TODO: ADd multi-cursor, create number, and adding table.
