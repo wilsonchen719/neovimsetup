@@ -32,7 +32,8 @@ return {
 		local dap = require("dap")
 		local dapui = require("dapui")
 		local goto = require("goto-breakpoints")
-		local pythonpath = vim.fn.exepath("python")
+		-- local pythonpath = vim.fn.exepath("python")
+		local pythonpath = "C:\\Users\\wilsonchen\\AppData\\Local\\anaconda3\\envs\\debugpy\\python.exe"
 		--{
 		-- -- Makes a best effort to setup the various debuggers with
 		-- -- reasonable debug configurations
@@ -85,7 +86,6 @@ return {
 				name = "Launch file",
 
 				-- Options below are for debugpy, see https://github.com/microsoft/debugpy/wiki/Debug-configuration-settings for supported options
-
 				program = "${file}", -- This configuration will launch the current file if used.
 				pythonPath = function()
 					-- debugpy supports launching an application with a different interpreter then the one used to launch debugpy itself.
@@ -99,7 +99,8 @@ return {
 					else
 						-- Please modify your code here to auto-select initial program
 						local current_env_python = os.getenv('CONDA_DEFAULT_ENV')
-						print(current_env_python)
+						print("I love you")
+						print("The debugpy path is ".. pythonpath)
 						print("C:\\Users\\wilsonchen\\AppData\\Local\\anaconda3\\envs\\" .. current_env_python .. "\\python.exe")
 						return "C:\\Users\\wilsonchen\\AppData\\Local\\anaconda3\\envs\\" .. current_env_python .. "\\python.exe"
 					end
