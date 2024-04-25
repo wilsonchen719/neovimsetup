@@ -76,9 +76,6 @@ vim.opt.cursorline = true
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 10
 
--- Show only 20 result of auto-complete suggestions.
-vim.opt.pumheight = 20
-
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
@@ -121,6 +118,10 @@ vim.keymap.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move focus to the right win
 vim.keymap.set("n", "<C-j>", "<C-w><C-j>", { desc = "Move focus to the lower window" })
 vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
 vim.keymap.set("n", "<leader>pv", "<cmd>Oil<CR>", { noremap = true, silent = true })
+vim.keymap.set("n", "<C-w>+", "<cmd>30winc ><CR>", { noremap = true, silent = true })
+vim.keymap.set("n", "<C-w>-", "<cmd>30winc <<CR>", { noremap = true, silent = true })
+vim.keymap.set("n", "<C-w><", "<cmd>10winc -<CR>", { noremap = true, silent = true })
+vim.keymap.set("n", "<C-w>>", "<cmd>10winc +<CR>", { noremap = true, silent = true })
 -- [[ Basic Autocommands ]
 --  See `:help lua-guide-`
 
@@ -171,7 +172,6 @@ require("lazy").setup({
 	"tpope/vim-sleuth", -- Detect tabstop and shiftwidth automatically
 	"jiangmiao/auto-pairs",
 	"BurntSushi/ripgrep",
-	"dhruvasagar/vim-table-mode",
 	{
 		"wilsonchen719/centerpad.nvim",
 		event = "VimEnter",
@@ -443,9 +443,9 @@ require("lazy").setup({
 			vim.keymap.set("n", "<leader>sn", function()
 				builtin.find_files({ cwd = vim.fn.stdpath("config") })
 			end, { desc = "[S]earch [N]eovim files" })
-			vim.keymap.set("n", "<leader>sd", function()
+			vim.keymap.set("n", "<leader>sp", function()
 				builtin.find_files({ cwd = vim.fn.stdpath("data") })
-			end, { desc = "[S]earch Neovim [D]" })
+			end, { desc = "[S]earch Neovim [P]ackages" })
 		end,
 	},
 	{
@@ -947,7 +947,6 @@ require("lazy").setup({
 				},
 			},
 			"saadparwaiz1/cmp_luasnip",
-
 			-- Adds other completion capabilities.
 			--  nvim-cmp does not ship with all sources by default. They are split
 			--  into multiple repos for maintenance purposes.
@@ -960,17 +959,22 @@ require("lazy").setup({
 			local cmp = require("cmp")
 			local luasnip = require("luasnip")
 			luasnip.config.setup({})
+			cmp.setup.cmdline("/", {
+				mapping = cmp.mapping.preset.cmdline(),
+				source = { { name = "path" } },
+			})
 			cmp.setup.cmdline(":", {
 				mapping = cmp.mapping.preset.cmdline(),
-				source = cmp.config.sources({
+				sources = cmp.config.sources({
 					{ name = "path" },
-				}),
-				{
+				}, {
 					{
 						name = "cmdline",
-						option = { ignore_cmds = { "Man", "!" } },
+						option = {
+							ignore_cmds = { "Man", "!" },
+						},
 					},
-				},
+				}),
 			})
 			cmp.setup({
 				snippet = {
@@ -1180,7 +1184,13 @@ require("lazy").setup({
 		"folke/todo-comments.nvim",
 		event = "VimEnter",
 		dependencies = { "nvim-lua/plenary.nvim" },
-		opts = { signs = false },
+		-- opts = { signs = false },
+		config = function()
+			require("todo-comments").setup({ signs = true })
+			vim.keymap.set("n", "<leader>st", function()
+				vim.cmd("TodoTelescope keywords=TODO,FIX")
+			end, { desc = "[S]earch [T]odo" })
+		end,
 	},
 
 	{ -- Collection of various small independent plugins/modules
@@ -1327,6 +1337,8 @@ require("lazy").setup({
 	require("kickstart.plugins.lint"),
 	require("wilsonchen.textobject"),
 	require("wilsonchen.undo"),
+	require("wilsonchen.tablemode"),
+	require("wilsonchen.iron"),
 
 	-- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
 	--    This is the easiest way to modularize your config.
@@ -1358,5 +1370,5 @@ require("lazy").setup({
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
 -- TODO: Research how to integrate git
--- TODO: Add benlubas/molten-nvim to run python in cell block
+-- TODO: Add benlubas/molten-nvim or magma or jypunium to run python in cell block
 -- TODO: ADd multi-cursor, create number, and adding table.

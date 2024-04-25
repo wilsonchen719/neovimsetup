@@ -20,8 +20,8 @@ return {
 						["ac"] = "@class.outer",
 						["ic"] = "@lass.inner",
 						-- Condition
-						["ii"] = "@condition.inner",
-						["ai"] = "@condition.outer",
+						["ii"] = "@conditional.inner",
+						["ai"] = "@conditional.outer",
 						-- Loop
 						["il"] = "@loop.inner",
 						["al"] = "@loop.outer",
@@ -62,7 +62,7 @@ return {
 						["<leader>j"] = "@parameter.inner",
 					},
 					swap_previous = {
-						["<leader>J"] = "@parameter.inner",
+						["<leader>k"] = "@parameter.inner",
 					},
 				},
 			},

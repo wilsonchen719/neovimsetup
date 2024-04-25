@@ -18,6 +18,7 @@
   "highlight-undo.nvim": { "branch": "main", "commit": "a0dbc6afa19b438ca5a6f54bc7f1a10399f21a15" },
   "hop.nvim": { "branch": "master", "commit": "6d853addd6e11df8338b26e869a29b36f2c3e893" },
   "indent-blankline.nvim": { "branch": "master", "commit": "3d08501caef2329aba5121b753e903904088f7e6" },
+  "iron.nvim": { "branch": "master", "commit": "f6f199e3d353fc5761e2feda63b569a98897c66b" },
   "lazy.nvim": { "branch": "main", "commit": "31ddbea7c10b6920c9077b66c97951ca8682d5c8" },
   "mason-lspconfig.nvim": { "branch": "main", "commit": "44509689b9bf3984d729cc264aacb31cb7f41668" },
   "mason-nvim-dap.nvim": { "branch": "main", "commit": "67210c0e775adec55de9826b038e8b62de554afc" },

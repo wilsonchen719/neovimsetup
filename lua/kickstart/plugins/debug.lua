@@ -87,6 +87,7 @@ return {
 
 				-- Options below are for debugpy, see https://github.com/microsoft/debugpy/wiki/Debug-configuration-settings for supported options
 				program = "${file}", -- This configuration will launch the current file if used.
+				console = "integratedTerminal",
 				pythonPath = function()
 					-- debugpy supports launching an application with a different interpreter then the one used to launch debugpy itself.
 					-- The code below looks for a `venv` or `.venv` folder in the current directly and uses the python within.
@@ -99,9 +100,6 @@ return {
 					else
 						-- Please modify your code here to auto-select initial program
 						local current_env_python = os.getenv('CONDA_DEFAULT_ENV')
-						print("I love you")
-						print("The debugpy path is ".. pythonpath)
-						print("C:\\Users\\wilsonchen\\AppData\\Local\\anaconda3\\envs\\" .. current_env_python .. "\\python.exe")
 						return "C:\\Users\\wilsonchen\\AppData\\Local\\anaconda3\\envs\\" .. current_env_python .. "\\python.exe"
 					end
 				end,
