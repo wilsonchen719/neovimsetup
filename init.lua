@@ -172,28 +172,37 @@ require("lazy").setup({
 	"tpope/vim-sleuth", -- Detect tabstop and shiftwidth automatically
 	"jiangmiao/auto-pairs",
 	"BurntSushi/ripgrep",
+	-- {
+	-- 	"wilsonchen719/centerpad.nvim",
+	-- 	event = "VimEnter",
+	-- 	config = function()
+	-- 		vim.keymap.set(
+	-- 			"n",
+	-- 			"<C-z>",
+	-- 			"<cmd>lua require('centerpad').toggle{ leftpad = 30, rightpad = 20 }<cr>",
+	-- 			{ silent = true, noremap = true, desc = "Center Editor" }
+	-- 		)
+	-- 		vim.keymap.set("n", "<leader>q", function()
+	-- 			if vim.fn.bufexists("leftpad") then
+	-- 				vim.cmd("bw leftpad")
+	-- 				vim.cmd("bw rightpad")
+	-- 				vim.cmd("wq")
+	-- 			else
+	-- 				vim.cmd("wq")
+	-- 			end
+	-- 		end)
+	-- 		-- if next(vim.fn.argv()) ~= nil then
+	-- 		vim.cmd("Centerpad 25 20")
+	-- 		-- end
+	-- 	end,
+	-- },
 	{
-		"wilsonchen719/centerpad.nvim",
+		"folke/zen-mode.nvim",
 		event = "VimEnter",
 		config = function()
-			vim.keymap.set(
-				"n",
-				"<C-z>",
-				"<cmd>lua require('centerpad').toggle{ leftpad = 30, rightpad = 20 }<cr>",
-				{ silent = true, noremap = true, desc = "Center Editor" }
-			)
-			vim.keymap.set("n", "<leader>q", function()
-				if vim.fn.bufexists("leftpad") then
-					vim.cmd("bw leftpad")
-					vim.cmd("bw rightpad")
-					vim.cmd("wq")
-				else
-					vim.cmd("wq")
-				end
-			end)
-			-- if next(vim.fn.argv()) ~= nil then
-			vim.cmd("Centerpad 25 20")
-			-- end
+			local zen = require("zen-mode")
+			vim.keymap.set("n", "<C-z>", "<cmd>ZenMode<CR>")
+			vim.cmd("ZenMode")
 		end,
 	},
 	"sharkdp/fd",
@@ -941,7 +950,45 @@ require("lazy").setup({
 					{
 						"rafamadriz/friendly-snippets",
 						config = function()
+							local ls = require("luasnip")
+							-- some shorthands...
+							local s = ls.snippet
+							-- local sn = ls.snippet_node
+							local t = ls.text_node
+							local i = ls.insert_node
+							-- local f = ls.function_node
+							-- local c = ls.choice_node
+							-- local d = ls.dynamic_node
+							-- local r = ls.restore_node
+							-- local l = require("luasnip.extras").lambda
+							-- local rep = require("luasnip.extras").rep
+							-- local p = require("luasnip.extras").partial
+							-- local m = require("luasnip.extras").match
+							-- local n = require("luasnip.extras").nonempty
+							-- local dl = require("luasnip.extras").dynamic_lambda
+							-- local fmt = require("luasnip.extras.fmt").fmt
+							-- local fmta = require("luasnip.extras.fmt").fmta
+							-- local types = require("luasnip.util.types")
+							-- local conds = require("luasnip.extras.conditions")
+							-- local conds_expand = require("luasnip.extras.conditions.expand")
 							require("luasnip.loaders.from_vscode").lazy_load()
+							require("luasnip").add_snippets("all", {
+								s("cell", {
+									t({ "#%% #CELL:" }),
+									i(1, "Name Your Cell Here"),
+									t({ "<cell>", "" }),
+									i(2, "Enter Your Code"),
+									t({ "", "#</cell>" }),
+								}),
+								s("visi", {
+									t({ "from visidata import vd" }),
+								}),
+								s("vd", {
+									t("vd.view_pandas("),
+									i(1, "Df"),
+									t(")"),
+								}),
+							})
 						end,
 					},
 				},
@@ -1070,7 +1117,7 @@ require("lazy").setup({
 		--
 		-- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
 		"folke/tokyonight.nvim",
-		--priority = 1000, -- Make sure to load this before all the other start plugins.
+		priority = 1000, -- Make sure to load this before all the other start plugins.
 		--
 		-- init = function()
 		-- 	-- Load the colorscheme here.
@@ -1153,40 +1200,107 @@ require("lazy").setup({
 	-- 		vim.cmd.hi("Comment gui=none")
 	-- 	end,
 	-- },
-	{
-		"AlexvZyl/nordic.nvim",
-		lazy = false,
-		priority = 1000,
-		config = function()
-			local palette = require("nordic.colors")
-			require("nordic").load()
-			require("nordic").setup({
-				override = {
-					TelescopePromptTitle = {
-						fg = palette.red.bright,
-						bg = palette.green.base,
-						italic = true,
-						underline = true,
-						sp = palette.yellow.dim,
-						undercurl = false,
-					},
-				},
-			})
-			vim.cmd.colorscheme("nordic")
-			vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
-			vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
-			vim.api.nvim_set_hl(0, "LineNr", { fg = "#7f7f7f" })
-			vim.cmd.hi("Comment gui=none")
-			vim.cmd.hi("Visual guibg=#60728A")
-		end,
-	},
+	-- {
+	-- 	"AlexvZyl/nordic.nvim",
+	-- 	lazy = false,
+	-- 	-- priority = 1000,
+	-- 	config = function()
+	-- 		local palette = require("nordic.colors")
+	-- 		require("nordic").load()
+	-- 		require("nordic").setup({
+	-- 			override = {
+	-- 				TelescopePromptTitle = {
+	-- 					fg = palette.red.bright,
+	-- 					bg = palette.green.base,
+	-- 					italic = true,
+	-- 					underline = true,
+	-- 					sp = palette.yellow.dim,
+	-- 					undercurl = false,
+	-- 				},
+	-- 			},
+	-- 		})
+	-- 		vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
+	-- 		vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+	-- 		vim.api.nvim_set_hl(0, "LineNr", { fg = "#7f7f7f" })
+	-- 		vim.cmd.hi("Comment gui=none")
+	-- 		vim.cmd.hi("Visual guibg=#60728A")
+	-- 	end,
+	-- },
 	{
 		"folke/todo-comments.nvim",
 		event = "VimEnter",
 		dependencies = { "nvim-lua/plenary.nvim" },
 		-- opts = { signs = false },
 		config = function()
-			require("todo-comments").setup({ signs = true })
+			require("todo-comments").setup({
+				merge_keywords = true,
+				keywords = {
+					CELL = { icon = "⚡", color = "hint" },
+				},
+				-- signs = true, -- show icons in the signs column
+				-- sign_priority = 8, -- sign priority
+				-- -- keywords recognized as todo comments
+				-- keywords = {
+				-- 	FIX = {
+				-- 		icon = " ", -- icon used for the sign, and in search results
+				-- 		color = "error", -- can be a hex color, or a named color (see below)
+				-- 		alt = { "FIXME", "BUG", "FIXIT", "ISSUE" }, -- a set of other keywords that all map to this FIX keywords
+				-- 		-- signs = false, -- configure signs for some keywords individually
+				-- 	},
+				-- 	TODO = { icon = " ", color = "info" },
+				-- 	HACK = { icon = " ", color = "warning" },
+				-- 	WARN = { icon = " ", color = "warning", alt = { "WARNING", "XXX" } },
+				-- 	PERF = { icon = " ", alt = { "OPTIM", "PERFORMANCE", "OPTIMIZE" } },
+				-- 	NOTE = { icon = " ", color = "hint", alt = { "INFO" } },
+				-- 	TEST = { icon = "⏲ ", color = "test", alt = { "TESTING", "PASSED", "FAILED" } },
+				-- 	CELL = { color = "hint" },
+				-- },
+				-- gui_style = {
+				-- 	fg = "NONE", -- The gui style to use for the fg highlight group.
+				-- 	bg = "BOLD", -- The gui style to use for the bg highlight group.
+				-- },
+				-- merge_keywords = true, -- when true, custom keywords will be merged with the defaults
+				-- -- highlighting of the line containing the todo comment
+				-- -- * before: highlights before the keyword (typically comment characters)
+				-- -- * keyword: highlights of the keyword
+				-- -- * after: highlights after the keyword (todo text)
+				-- highlight = {
+				-- 	multiline = true, -- enable multine todo comments
+				-- 	multiline_pattern = "^.", -- lua pattern to match the next multiline from the start of the matched keyword
+				-- 	multiline_context = 10, -- extra lines that will be re-evaluated when changing a line
+				-- 	before = "", -- "fg" or "bg" or empty
+				-- 	keyword = "wide", -- "fg", "bg", "wide", "wide_bg", "wide_fg" or empty. (wide and wide_bg is the same as bg, but will also highlight surrounding characters, wide_fg acts accordingly but with fg)
+				-- 	after = "fg", -- "fg" or "bg" or empty
+				-- 	pattern = [[.*<(KEYWORDS)\s*:]], -- pattern or table of patterns, used for highlighting (vim regex)
+				-- 	comments_only = true, -- uses treesitter to match keywords in comments only
+				-- 	max_line_len = 400, -- ignore lines longer than this
+				-- 	exclude = {}, -- list of file types to exclude highlighting
+				-- },
+				-- -- list of named colors where we try to extract the guifg from the
+				-- -- list of highlight groups or use the hex color if hl not found as a fallback
+				-- colors = {
+				-- 	error = { "DiagnosticError", "ErrorMsg", "#DC2626" },
+				-- 	warning = { "DiagnosticWarn", "WarningMsg", "#FBBF24" },
+				-- 	info = { "DiagnosticInfo", "#2563EB" },
+				-- 	hint = { "DiagnosticHint", "#10B981" },
+				-- 	default = { "Identifier", "#7C3AED" },
+				-- 	test = { "Identifier", "#FF00FF" },
+				-- },
+				-- search = {
+				-- 	command = "rg",
+				-- 	args = {
+				-- 		"--color=never",
+				-- 		"--no-heading",
+				-- 		"--with-filename",
+				-- 		"--line-number",
+				-- 		"--column",
+				-- 	},
+				-- 	-- regex that will be used to match keywords.
+				-- 	-- don't replace the (KEYWORDS) placeholder
+				-- 	pattern = [[\b(KEYWORDS):]], -- ripgrep regex
+				-- 	-- pattern = [[\b(KEYWORDS)\b]], -- match without the extra colon. You'll likely get false positives
+				-- },
+			})
 			vim.keymap.set("n", "<leader>st", function()
 				vim.cmd("TodoTelescope keywords=TODO,FIX")
 			end, { desc = "[S]earch [T]odo" })
@@ -1339,6 +1453,7 @@ require("lazy").setup({
 	require("wilsonchen.undo"),
 	require("wilsonchen.tablemode"),
 	require("wilsonchen.iron"),
+	require("wilsonchen.rainbowpairs"),
 
 	-- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
 	--    This is the easiest way to modularize your config.

@@ -29,18 +29,27 @@ return {
 				mark_motion = "<leader>mc",
 				mark_visual = "<leaderd>mc",
 				remove_mark = "<leader>md",
-				cr = "<S-CR>",
-				interrupt = "<space>is",
-				exit = "<spaced>ie",
-				clear = "<space>ir",
+				interrupt = "<leader>ip",
+				exit = "<leader>ie",
+				clear = "<leader>ia",
 			},
-			-- If the higlihgt is on, you can change how it
-			-- For the available options, check nvim_set_hl
+			-- If the higlihgt is on, you can change how it:
+			-- For the available options, check nvim_set_hl"
 			higlihgt = {
 				italic = true,
 			},
 			ignore_blank_lines = true, -- ignore blank lines when sending visual select lines
 			--Floating Version
 		})
+		vim.keymap.set("n", "<leader>rc", function()
+			vim.api.nvim_feedkeys("vit", "n", false)
+			iron.visual_send()
+			vim.cmd("IronFocus")
+			vim.api.nvim_feedkeys("i", "n", false)
+		end, { desc = "[R]un [C]ell" })
+
+		vim.keymap.set("n", "<leader>ih", "<cmd>IronHide<CR>", { desc = "[I]ron [H]ide" })
+		vim.keymap.set("n", "<leader>ir", "<cmd>IronRestart<CR>", { desc = "[I]ron [R]estart" })
+		vim.keymap.set("n", "<leader>is", "<cmd>IronFocus<CR>", { desc = "[I]ron focu[S]" })
 	end,
 }
