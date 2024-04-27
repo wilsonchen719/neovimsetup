@@ -6,7 +6,7 @@
 -- be extended to other languages as well. That's why it's called
 -- kickstart.nvim and not kitchen-sink.nvim ;)
 
-return {
+return { {
 	-- NOTE: Yes, you can install new plugins here!
 	"mfussenegger/nvim-dap",
 	-- NOTE: And you can specify dependencies as well
@@ -109,14 +109,14 @@ return {
 		-- Basic debugging keymaps, feel free to change to your liking!
 		vim.keymap.set("n", "<F5>", function()
 			dap.continue()
-		end, { desc = "Debug: Start/Continue" })
+			end, { desc = "Debug: Start/Continue" })
 		vim.keymap.set("n", "<F2>", dap.step_into, { desc = "Debug: Step Into" })
 		vim.keymap.set("n", "<F3>", goto.next, { desc = "Debug: Jump Breakpoint" })
 		vim.keymap.set("n", "<F4>", goto.stopped, { desc = "Debug: Jump To Stopped Line" })
 		vim.keymap.set("n", "<F9>", dap.toggle_breakpoint, { desc = "Debug: Toggle Breakpoint" })
 		vim.keymap.set("n", "<F8>", function()
 			dap.set_breakpoint(vim.fn.input("Breakpoint condition: "))
-		end, { desc = "Debug: Set Breakpoint" })
+			end, { desc = "Debug: Set Breakpoint" })
 
 		-- Dap UI setup
 		-- For more information, see |:help nvim-dap-ui|
@@ -129,7 +129,7 @@ return {
 
 		-- Toggle to see last session result. Without this, you can't see session output in case of unhandled exception.
 		vim.keymap.set("n", "<F7>", dapui.toggle, { desc = "Debug: See last session result." })
-		
+
 		-- Reset debugger icons
 		local sign = vim.fn.sign_define
 		sign("DapBreakpoint", { text = "●", texthl = "DapBreakpoint", linehl = "", numhl = ""})
@@ -144,5 +144,42 @@ return {
 		-- Install golang specific config
 		--require("dap-go").setup()
 		--require("dap-python").setup(path)
-	end,
+	end, },
+	{
+		"Willem-J-an/visidata.nvim",
+		dependencies = {
+			"mfussenegger/nvim-dap",
+			"rcarriga/nvim-dap-ui"
+		},
+		config = function()
+			local dap = require("dap")
+			local dapui = require("dapui")
+			dap.defaults.fallback.external_terminal = {
+				command = "<Path to your terminal of choice>",
+				args = { "--hold", "--command" },
+			}
+			local function tempsolution ()
+				dapui.float_element("console", {width = 250, height = 100, enter= true, position = "center"})
+				require("visidata").visualize_pandas_df()
+			end
+			vim.keymap.set("v", "<leader>vp",
+				function()tempsolution()end, { desc = "[V]isualize [P]andas" })
+		end,		
+	},
+	{
+		"rcarriga/cmp-dap",
+		config = function()
+			require("cmp").setup({
+				  enabled = function()
+					return vim.api.nvim_buf_get_option(0, "buftype") ~= "prompt"
+						or require("cmp_dap").is_dap_buffer()
+				  end
+				})
+			require("cmp").setup.filetype({ "dap-repl", "dapui_watches", "dapui_hover" }, {
+			  sources = {
+				{ name = "dap" },
+			  },
+			})
+		end
+	}
 }

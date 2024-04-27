@@ -43,6 +43,8 @@ vim.opt.breakindent = true
 -- Save undo history
 vim.opt.undofile = true
 
+-- Confined auto-complete suggestions to 20 results
+vim.opt.pumheight = 20
 -- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
@@ -89,6 +91,13 @@ vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Go to next [D]iagn
 vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Show diagnostic [E]rror messages" })
 vim.keymap.set("n", "Q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
 
+-- Easiest Way to Escape Command Mode.
+vim.keymap.set("t", "<ESC>", function()
+	vim.cmd('call feedkeys("\\<Esc>", "n")')
+	vim.cmd('call feedkeys("\\<Esc>", "n")')
+	vim.cmd("wincmd h")
+end)
+
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
 -- is not what someone will guess without a bit more experience.
@@ -102,6 +111,8 @@ vim.keymap.set("n", "<C-d>", "<C-d>zz")
 vim.keymap.set("n", "n", "nzzzv")
 vim.keymap.set("n", "N", "Nzzzv")
 vim.keymap.set("x", "p", '"_dP')
+--Quick Safe
+vim.keymap.set("n", "q", "<cmd>wq<CR>", { desc = "Save and Quit" })
 
 -- TIP: Disable arrow keys in normal mode
 -- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
@@ -1089,7 +1100,7 @@ require("lazy").setup({
 		version = "*",
 		config = function()
 			require("toggleterm").setup({
-				size = 10,
+				size = 80,
 				open_mapping = [[<C-\>]],
 				hide_numbers = true,
 				shade_dfiletypes = {},
@@ -1097,7 +1108,7 @@ require("lazy").setup({
 				start_in_insrt = true,
 				insert_mappings = true,
 				persist_size = true,
-				direction = "horizontal",
+				direction = "vertical",
 				close_on_exit = true,
 				shell = vim.o.shell,
 				float_opts = {
@@ -1109,97 +1120,109 @@ require("lazy").setup({
 					},
 				},
 			})
+			local function visual_send()
+				if vim.bo.filetype == "python" then
+					vim.api.nvim_feedkeys("yit", "n", false)
+					require("toggleterm").exec("%paste", 1)
+				else
+					-- allback doesn't work
+					require("toggleterm").send_lines_to_terminal("visual_selection", true, { 1 })
+				end
+			end
+			vim.keymap.set("n", "<leader>rr", function()
+				visual_send()
+			end)
 		end,
 	},
-	{ -- You can easily change to a different colorscheme.
-		-- Change the name of the colorscheme plugin below, and then
-		-- change the command in the config to whatever the name of that colorscheme is.
-		--
-		-- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-		"folke/tokyonight.nvim",
-		priority = 1000, -- Make sure to load this before all the other start plugins.
-		--
-		-- init = function()
-		-- 	-- Load the colorscheme here.
-		-- 	-- Like many other themes, this one has different styles, and you could load
-		-- 	-- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-		-- 	-- Set Backgroun to transparent
-		no_italic = true,
-		no_bold = true,
-		init = function()
-			vim.cmd.colorscheme("tokyonight-moon")
-			vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
-			vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
-			vim.api.nvim_set_hl(0, "LineNr", { fg = "#7f7f7f" })
-			vim.cmd.hi("Comment gui=none")
-		end,
-	},
-
-	-- Highlight todo, notes, etc in comments
-	-- ,
-	-- {
-	-- 	"Mofiqul/dracula.nvim",
-	-- 	opts = { colorscheme = "dracula" },
-	-- 	config = function()
-	-- 		local dracula = require("dracula")
-	-- 		dracula.setup({
-	-- 			-- customize dracula color palette
-	-- 			colors = {
-	-- 				bg = "#282A36",
-	-- 				fg = "#F8F8F2",
-	-- 				selection = "#44475A",
-	-- 				comment = "#6272A4",
-	-- 				red = "#FF5555",
-	-- 				orange = "#FFB86C",
-	-- 				yellow = "#F1FA8C",
-	-- 				green = "#50fa7b",
-	-- 				purple = "#BD93F9",
-	-- 				cyan = "#8BE9FD",
-	-- 				pink = "#FF79C6",
-	-- 				bright_red = "#FF6E6E",
-	-- 				bright_green = "#69FF94",
-	-- 				bright_yellow = "#FFFFA5",
-	-- 				bright_blue = "#D6ACFF",
-	-- 				bright_magenta = "#FF92DF",
-	-- 				bright_cyan = "#A4FFFF",
-	-- 				bright_white = "#FFFFFF",
-	-- 				menu = "#21222C",
-	-- 				visual = "#3E4452",
-	-- 				gutter_fg = "#4B5263",
-	-- 				nontext = "#3B4048",
-	-- 				white = "#ABB2BF",
-	-- 				black = "#191A21",
-	-- 			},
-	-- 			-- show the '~' characters after the end of buffers
-	-- 			show_end_of_buffer = true, -- default false
-	-- 			-- use transparent background
-	-- 			transparent_bg = false, -- default false
-	-- 			-- set custom lualine background color
-	-- 			lualine_bg_color = "#44475a", -- default nil
-	-- 			-- set italic comment
-	-- 			italic_comment = true, -- default false
-	-- 			-- overrides the default highlights with table see `:h synIDattr`
-	-- 			overrides = {},
-	-- 			-- You can use overrides as table like this
-	-- 			-- overrides = {
-	-- 			--   NonText = { fg = "white" }, -- set NonText fg to white
-	-- 			--   NvimTreeIndentMarker = { link = "NonText" }, -- link to NonText highlight
-	-- 			--   Nothing = {} -- clear highlight of Nothing
-	-- 			-- },
-	-- 			-- Or you can also use it like a function to get color from theme
-	-- 			-- overrides = function (colors)
-	-- 			--   return {
-	-- 			--     NonText = { fg = colors.white }, -- set NonText fg to white of theme
-	-- 			--   }
-	-- 			-- end,
-	-- 		})
-	-- 		vim.cmd.colorscheme("dracula")
+	-- { -- You can easily change to a different colorscheme.
+	-- 	-- Change the name of the colorscheme plugin below, and then
+	-- 	-- change the command in the config to whatever the name of that colorscheme is.
+	-- 	--
+	-- 	-- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
+	-- 	"folke/tokyonight.nvim",
+	-- 	priority = 1000, -- Make sure to load this before all the other start plugins.
+	-- 	--
+	-- 	-- init = function()
+	-- 	-- 	-- Load the colorscheme here.
+	-- 	-- 	-- Like many other themes, this one has different styles, and you could load
+	-- 	-- 	-- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
+	-- 	-- 	-- Set Backgroun to transparent
+	-- 	no_italic = true,
+	-- 	no_bold = true,
+	-- 	init = function()
+	-- 		vim.cmd.colorscheme("tokyonight-moon")
 	-- 		vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
 	-- 		vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
 	-- 		vim.api.nvim_set_hl(0, "LineNr", { fg = "#7f7f7f" })
 	-- 		vim.cmd.hi("Comment gui=none")
 	-- 	end,
 	-- },
+
+	-- Highlight todo, notes, etc in comments
+	-- ,
+	{
+		"Mofiqul/dracula.nvim",
+		opts = { colorscheme = "dracula" },
+		config = function()
+			local dracula = require("dracula")
+			dracula.setup({
+				-- customize dracula color palette
+				colors = {
+					bg = "#282A36",
+					fg = "#F8F8F2",
+					selection = "#44475A",
+					comment = "#6272A4",
+					red = "#FF5555",
+					orange = "#FFB86C",
+					yellow = "#F1FA8C",
+					green = "#50fa7b",
+					purple = "#BD93F9",
+					cyan = "#8BE9FD",
+					pink = "#FF79C6",
+					bright_red = "#FF6E6E",
+					bright_green = "#69FF94",
+					bright_yellow = "#FFFFA5",
+					bright_blue = "#D6ACFF",
+					bright_magenta = "#FF92DF",
+					bright_cyan = "#A4FFFF",
+					bright_white = "#FFFFFF",
+					menu = "#21222C",
+					visual = "#3E4452",
+					gutter_fg = "#4B5263",
+					nontext = "#3B4048",
+					white = "#ABB2BF",
+					black = "#191A21",
+				},
+				-- show the '~' characters after the end of buffers
+				show_end_of_buffer = true, -- default false
+				-- use transparent background
+				transparent_bg = false, -- default false
+				-- set custom lualine background color
+				lualine_bg_color = "#44475a", -- default nil
+				-- set italic comment
+				italic_comment = true, -- default false
+				-- overrides the default highlights with table see `:h synIDattr`
+				overrides = {},
+				-- You can use overrides as table like this
+				-- overrides = {
+				--   NonText = { fg = "white" }, -- set NonText fg to white
+				--   NvimTreeIndentMarker = { link = "NonText" }, -- link to NonText highlight
+				--   Nothing = {} -- clear highlight of Nothing
+				-- },
+				-- Or you can also use it like a function to get color from theme
+				-- overrides = function (colors)
+				--   return {
+				--     NonText = { fg = colors.white }, -- set NonText fg to white of theme
+				--   }
+				-- end,
+			})
+			vim.cmd.colorscheme("dracula")
+			vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
+			vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+			vim.api.nvim_set_hl(0, "LineNr", { fg = "#7f7f7f" })
+			vim.cmd.hi("Comment gui=none")
+		end,
+	},
 	-- {
 	-- 	"AlexvZyl/nordic.nvim",
 	-- 	lazy = false,
@@ -1304,6 +1327,9 @@ require("lazy").setup({
 			vim.keymap.set("n", "<leader>st", function()
 				vim.cmd("TodoTelescope keywords=TODO,FIX")
 			end, { desc = "[S]earch [T]odo" })
+			vim.keymap.set("n", "<leader>sc", function()
+				vim.cmd("TodoTelescope keywords=CELL")
+			end, { desc = "[S]earch [C]ell" })
 		end,
 	},
 
@@ -1465,7 +1491,7 @@ require("lazy").setup({
 	ui = {
 		-- If you are using a Nerd Font: set icons to an empty table which will use the
 		-- default lazy.nvim defined Nerd Font icons, otherwise define a unicode icons table
-		icons = vim.g.have_nerd_font and {} or {
+		icons = {
 			cmd = "⌘",
 			config = "🛠",
 			event = "📅",
@@ -1485,5 +1511,5 @@ require("lazy").setup({
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
 -- TODO: Research how to integrate git
--- TODO: Add benlubas/molten-nvim or magma or jypunium to run python in cell block
--- TODO: ADd multi-cursor, create number, and adding table.
+-- TODO: Use
+-- TODO: Ad multi-cursor, create number, and adding table.
