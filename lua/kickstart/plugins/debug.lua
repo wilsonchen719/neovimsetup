@@ -83,11 +83,11 @@ return { {
 				-- The first three options are required by nvim-dap
 				type = "python", -- the type here established the link to the adapter definition: `dap.adapters.python`
 				request = "launch",
-				name = "Launch file",
+				name = "Launch file in externalTerminal",
 
 				-- Options below are for debugpy, see https://github.com/microsoft/debugpy/wiki/Debug-configuration-settings for supported options
 				program = "${file}", -- This configuration will launch the current file if used.
-				console = "integratedTerminal",
+				console = "externalTerminal",
 				pythonPath = function()
 					-- debugpy supports launching an application with a different interpreter then the one used to launch debugpy itself.
 					-- The code below looks for a `venv` or `.venv` folder in the current directly and uses the python within.
@@ -104,6 +104,11 @@ return { {
 					end
 				end,
 			},
+		}
+		dap.defaults.fallback.force_external_terminal = true
+		dap.defaults.fallback.external_terminal = {
+			command ="C:/Users/wilsonchen/AppData/Local/Microsoft/WindowsApps/wt.exe";
+			arg= {};
 		}
 
 		-- Basic debugging keymaps, feel free to change to your liking!
@@ -154,10 +159,10 @@ return { {
 		config = function()
 			local dap = require("dap")
 			local dapui = require("dapui")
-			dap.defaults.fallback.external_terminal = {
-				command = "<Path to your terminal of choice>",
-				args = { "--hold", "--command" },
-			}
+			-- dap.defaults.fallback.external_terminal = {
+			-- 	command = "<Path to your terminal of choice>",
+			-- 	args = { "--hold", "--command" },
+			-- }
 			local function tempsolution ()
 				dapui.float_element("console", {width = 250, height = 100, enter= true, position = "center"})
 				require("visidata").visualize_pandas_df()
@@ -178,6 +183,7 @@ return { {
 			require("cmp").setup.filetype({ "dap-repl", "dapui_watches", "dapui_hover" }, {
 			  sources = {
 				{ name = "dap" },
+				{ name = "luasnip"},
 			  },
 			})
 		end
