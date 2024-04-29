@@ -213,7 +213,7 @@ require("lazy").setup({
 		config = function()
 			local zen = require("zen-mode")
 			vim.keymap.set("n", "<C-z>", "<cmd>ZenMode<CR>")
-			vim.cmd("ZenMode")
+			-- vim.cmd("ZenMode")
 		end,
 	},
 	"sharkdp/fd",
@@ -1220,7 +1220,7 @@ require("lazy").setup({
 			vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
 			vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
 			vim.api.nvim_set_hl(0, "LineNr", { fg = "#7f7f7f" })
-			vim.cmd.hi("Comment gui=none")
+			vim.cmd.hi("Comment guibg=none ctermbg= None")
 		end,
 	},
 	-- {

@@ -151,24 +151,14 @@ return { {
 		--require("dap-python").setup(path)
 	end, },
 	{
-		"Willem-J-an/visidata.nvim",
+		"wilsonchen719/visidata.nvim",
 		dependencies = {
 			"mfussenegger/nvim-dap",
 			"rcarriga/nvim-dap-ui"
 		},
 		config = function()
-			local dap = require("dap")
-			local dapui = require("dapui")
-			-- dap.defaults.fallback.external_terminal = {
-			-- 	command = "<Path to your terminal of choice>",
-			-- 	args = { "--hold", "--command" },
-			-- }
-			local function tempsolution ()
-				dapui.float_element("console", {width = 250, height = 100, enter= true, position = "center"})
-				require("visidata").visualize_pandas_df()
-			end
 			vim.keymap.set("v", "<leader>vp",
-				function()tempsolution()end, { desc = "[V]isualize [P]andas" })
+				function()require("visidata").visualize_pandas_df()end, { desc = "[V]isualize [P]andas" })
 		end,		
 	},
 	{
