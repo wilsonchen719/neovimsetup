@@ -54,6 +54,16 @@ return { {
 		-- },
 		--})
 		dap.adapters.python = function(cb, config)
+			local function is_multiline(text)
+				if string.sub(text, -1) == ':' then
+					return true
+				elseif string.sub(text, -1) == '\\' then
+					return true
+				elseif select(2, string.gsub(text, '"""', "")) == 1 then
+					return true
+				end
+				return false
+			end
 			if config.request == "attach" then
 				---@diagnostic disable-next-line: undefined-field
 				local port = (config.connect or config).port
@@ -66,6 +76,7 @@ return { {
 					options = {
 						source_filetype = "python",
 					},
+					is_multiline = is_multiline
 				})
 			else
 				cb({
@@ -75,6 +86,7 @@ return { {
 					options = {
 						source_filetype = "python",
 					},
+					is_multiline = is_multiline
 				})
 			end
 		end
@@ -103,6 +115,7 @@ return { {
 						return "C:\\Users\\wilsonchen\\AppData\\Local\\anaconda3\\envs\\" .. current_env_python .. "\\python.exe"
 					end
 				end,
+				repl_lang = "python",
 			},
 		}
 		dap.defaults.fallback.force_external_terminal = true
@@ -177,5 +190,6 @@ return { {
 			  },
 			})
 		end
-	}
+	},
+	
 }

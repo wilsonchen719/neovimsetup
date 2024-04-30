@@ -1369,7 +1369,12 @@ require("lazy").setup({
 			--  Check out: https://github.com/echasnovski/mini.nvim
 		end,
 	},
-
+	{
+		"LiadOz/nvim-dap-repl-highlights",
+		config = function()
+			require("nvim-dap-repl-highlights").setup()
+		end,
+	},
 	{ -- Highlight, edit, and navigate code
 		"nvim-treesitter/nvim-treesitter",
 		build = ":TSUpdate",
