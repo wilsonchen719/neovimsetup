@@ -6,6 +6,44 @@
 -- be extended to other languages as well. That's why it's called
 -- kickstart.nvim and not kitchen-sink.nvim ;)
 
+-- NOTE: Customized functions to send multilple line to dap-repl
+local function intToLetter(n)
+	local alphabet = "abcdefghijklmnopqrstuvwxyz"
+	local upperAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	if n >= 1 and n <= 26 then
+		return alphabet:sub(n, n)
+	elseif n >= 27 and n <= 52 then
+		return upperAlphabet:sub(n - 26, n - 26)
+	else
+		print("Can't do more than 52 lines.")
+	end
+end
+
+local function copy_paste_code_to_repl_line_by_line()
+	local start_line = vim.fn.getpos("'<")[2]
+	local end_line = vim.fn.getpos("'>")[2]
+	local buffer = vim.api.nvim_get_current_buf()
+	print(start_line)
+	print(end_line)
+	print(end_line - start_line)
+	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, true, true), "n", false)
+	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-w><C-j>", true, true, true), "n", false)
+	vim.api.nvim_feedkeys("i", "n", false)
+	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<S-CR>", true, true, true), "", false)
+
+	for line_number = start_line, end_line do
+		local line_content = vim.api.nvim_buf_get_lines(buffer, line_number - 1, line_number, false)[1]
+		local register_str = intToLetter(line_number - start_line + 1)
+		vim.api.nvim_call_function("setreg", { register_str, line_content })
+		vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-R>" .. register_str, true, true, true), "n", true)
+		vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<CR>", true, true, true), "", false)
+	end
+end
+
+vim.keymap.set("v", "<S-Cr>", function()
+	copy_paste_code_to_repl_line_by_line()
+end)
+
 return { {
 	-- NOTE: Yes, you can install new plugins here!
 	"mfussenegger/nvim-dap",
@@ -100,6 +138,7 @@ return { {
 				-- Options below are for debugpy, see https://github.com/microsoft/debugpy/wiki/Debug-configuration-settings for supported options
 				program = "${file}", -- This configuration will launch the current file if used.
 				console = "externalTerminal",
+				command = "C:/Users/wilsonchen/AppData/Local/Microsoft/WindowsApps/wt.exe",
 				pythonPath = function()
 					-- debugpy supports launching an application with a different interpreter then the one used to launch debugpy itself.
 					-- The code below looks for a `venv` or `.venv` folder in the current directly and uses the python within.
@@ -123,7 +162,6 @@ return { {
 			command ="C:/Users/wilsonchen/AppData/Local/Microsoft/WindowsApps/wt.exe";
 			arg= {};
 		}
-
 		-- Basic debugging keymaps, feel free to change to your liking!
 		vim.keymap.set("n", "<F5>", function()
 			dap.continue()
@@ -131,11 +169,12 @@ return { {
 		vim.keymap.set("n", "<F2>", dap.step_into, { desc = "Debug: Step Into" })
 		vim.keymap.set("n", "<F3>", goto.next, { desc = "Debug: Jump Breakpoint" })
 		vim.keymap.set("n", "<F4>", goto.stopped, { desc = "Debug: Jump To Stopped Line" })
-		vim.keymap.set("n", "<F9>", dap.toggle_breakpoint, { desc = "Debug: Toggle Breakpoint" })
-		vim.keymap.set("n", "<F8>", function()
-			dap.set_breakpoint(vim.fn.input("Breakpoint condition: "))
-			end, { desc = "Debug: Set Breakpoint" })
-
+		vim.keymap.set("n", "<S-F5>", function() dap.terminate() end, { desc = "Debug: Terminate" })
+		-- vim.keymap.set("n", "<F8>", function()
+		-- 	dap.set_breakpoint(vim.fn.input("Breakpoint condition: "))
+		-- 	end, { desc = "Debug: Set Breakpoint" })
+		vim.keymap.set("n", "<leader>ep", function() vim.cmd('lua require("dapui").eval()') end, {desc = "Debug: [EV]aluate"})
+		vim.keymap.set("v", "<leader>ep", function() vim.cmd('lua require("dapui").eval()') end, {desc = "Debug: [EV]aluate"})
 		-- Dap UI setup
 		-- For more information, see |:help nvim-dap-ui|
 		dapui.setup({
@@ -191,5 +230,20 @@ return { {
 			})
 		end
 	},
-	
+	{
+		"Weissle/persistent-breakpoints.nvim",
+		config = function()
+			require("persistent-breakpoints").setup{load_breakpoints_event = {"BufReadPost"}}
+			vim.keymap.set("n", "<F9>", function() 
+				vim.cmd( "lua require('persistent-breakpoints.api').toggle_breakpoint() ")
+			end,
+			{ desc = "debug: toggle breakpoint" })
+			vim.keymap.set("n", "<F8>", function() 
+				vim.cmd( "lua require('persistent-breakpoints.api').set_conditional_breakpoint() ")
+			end,
+			{ desc = "debug: toggle breakpoint" })
+		end
+	}
 }
+--
+-- vim.keymap.set('n', '<leader>ll', function() add_line(vim.fn.getreg('"')) end, {buffer = vim.fn.bufnr("dap-repl")})

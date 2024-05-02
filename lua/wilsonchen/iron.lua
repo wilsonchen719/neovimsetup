@@ -46,14 +46,14 @@ return {
 			iron.visual_send()
 			vim.cmd("IronFocus")
 			vim.api.nvim_feedkeys("i", "n", false)
-			vim.cmd('call feedkeys("\\<CR>", "n")')
+			vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<CR>", true, true, true), "n", true)
 		end, { desc = "[R]un [C]ell" })
 
 		vim.keymap.set("v", "<leader>ic", function()
 			iron.visual_send()
 			vim.cmd("IronFocus")
 			vim.api.nvim_feedkeys("i", "n", false)
-			vim.cmd('call feedkeys("\\<CR>", "n")')
+			vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<CR>", true, true, true), "n", true)
 		end, { desc = "[I]ron [C]ell" })
 
 		local function untoggle()
