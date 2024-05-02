@@ -14,6 +14,7 @@ vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.colorcolumn = "120"
 vim.opt.textwidth = 120
+vim.opt.wrap = false
 -- Stop autoindenting next line.
 vim.cmd([[autocmd FileType * set formatoptions-=ro]])
 -- You can also add relative line numbers, to help with jumping.
@@ -210,35 +211,10 @@ require("lazy").setup({
 		"folke/zen-mode.nvim",
 		event = "VimEnter",
 		config = function()
-			local zen = require("zen-mode")
 			vim.keymap.set("n", "<C-z>", "<cmd>ZenMode<CR>")
-			-- vim.cmd("ZenMode")
 		end,
 	},
 	"sharkdp/fd",
-	{
-		"goolord/alpha-nvim",
-		dependencies = {
-			"nvim-tree/nvim-web-devicons",
-		},
-		config = function()
-			local alpha = require("alpha")
-			local dashboard = require("alpha.themes.startify")
-			dashboard.section.header.val = {
-				[[                                                                       ]],
-				[[                                                                     ]],
-				[[       ████ ██████           █████      ██                     ]],
-				[[      ███████████             █████                             ]],
-				[[      █████████ ███████████████████ ███   ███████████   ]],
-				[[     █████████  ███    █████████████ █████ ██████████████   ]],
-				[[    █████████ ██████████ █████████ █████ █████ ████ █████   ]],
-				[[  ███████████ ███    ███ █████████ █████ █████ ████ █████  ]],
-				[[ ██████  █████████████████████ ████ █████ █████ ████ ██████ ]],
-				[[                                                                       ]],
-			}
-			alpha.setup(dashboard.opts)
-		end,
-	},
 	{
 		"folke/noice.nvim",
 		event = "VeryLazy",
@@ -462,9 +438,12 @@ require("lazy").setup({
 			vim.keymap.set("n", "<leader>sn", function()
 				builtin.find_files({ cwd = vim.fn.stdpath("config") })
 			end, { desc = "[S]earch [N]eovim files" })
-			vim.keymap.set("n", "<leader>sp", function()
+			vim.keymap.set("n", "<leader>su", function()
 				builtin.find_files({ cwd = vim.fn.stdpath("data") })
-			end, { desc = "[S]earch Neovim [P]ackages" })
+			end, { desc = "[S]earch Neovim pl[u]gins" })
+			vim.keymap.set("n", "<leader>sp", function()
+				require("telescope").extensions.projects.projects({})
+			end, { desc = "[S]earch [P]rojects" })
 		end,
 	},
 	{
@@ -943,164 +922,6 @@ require("lazy").setup({
 			},
 		},
 	},
-
-	{ -- Autocompletion
-		"hrsh7th/nvim-cmp",
-		event = "InsertEnter",
-		dependencies = {
-			-- Snippet Engine & its associated nvim-cmp source
-			{
-				"L3MON4D3/LuaSnip",
-				build = (function()
-					-- Build Step is needed for regex support in snippets.
-					-- This step is not supported in many windows environments.
-					-- Remove the below condition to re-enable on windows.
-					-- if vim.fn.has("win32") == 1 or vim.fn.executable("make") == 0 then
-					-- 	return
-					-- end
-					return "make install_jsregexp"
-				end)(),
-				dependencies = {
-					-- `friendly-snippets` contains a variety of premade snippets.
-					--    See the README about individual language/framework/plugin snippets:
-					--    https://github.com/rafamadriz/friendly-snippets
-					{
-						"rafamadriz/friendly-snippets",
-						config = function()
-							local ls = require("luasnip")
-							-- some shorthands...
-							local s = ls.snippet
-							-- local sn = ls.snippet_node
-							local t = ls.text_node
-							local i = ls.insert_node
-							-- local f = ls.function_node
-							-- local c = ls.choice_node
-							-- local d = ls.dynamic_node
-							-- local r = ls.restore_node
-							-- local l = require("luasnip.extras").lambda
-							-- local rep = require("luasnip.extras").rep
-							-- local p = require("luasnip.extras").partial
-							-- local m = require("luasnip.extras").match
-							-- local n = require("luasnip.extras").nonempty
-							-- local dl = require("luasnip.extras").dynamic_lambda
-							-- local fmt = require("luasnip.extras.fmt").fmt
-							-- local fmta = require("luasnip.extras.fmt").fmta
-							-- local types = require("luasnip.util.types")
-							-- local conds = require("luasnip.extras.conditions")
-							-- local conds_expand = require("luasnip.extras.conditions.expand")
-							require("luasnip.loaders.from_vscode").lazy_load()
-							require("luasnip").add_snippets("all", {
-								s("cell", {
-									t({ "#%% #CELL:" }),
-									i(1, "Name Your Cell Here"),
-									t({ "<cell>", "" }),
-									i(2, "Enter Your Code"),
-									t({ "", "#</cell>" }),
-								}),
-								s("visi", {
-									t({ "from visidata import vd" }),
-								}),
-								s("vd", {
-									t("vd.view_pandas("),
-									i(1, "Df"),
-									t(")"),
-								}),
-							})
-						end,
-					},
-				},
-			},
-			"saadparwaiz1/cmp_luasnip",
-			-- Adds other completion capabilities.
-			--  nvim-cmp does not ship with all sources by default. They are split
-			--  into multiple repos for maintenance purposes.
-			"hrsh7th/cmp-nvim-lsp",
-			"hrsh7th/cmp-path",
-			"hrsh7th/cmp-cmdline",
-		},
-		config = function()
-			-- See `:help cmp`
-			local cmp = require("cmp")
-			local luasnip = require("luasnip")
-			luasnip.config.setup({})
-			cmp.setup.cmdline("/", {
-				mapping = cmp.mapping.preset.cmdline(),
-				source = { { name = "path" } },
-			})
-			cmp.setup.cmdline(":", {
-				mapping = cmp.mapping.preset.cmdline(),
-				sources = cmp.config.sources({
-					{ name = "path" },
-				}, {
-					{
-						name = "cmdline",
-						option = {
-							ignore_cmds = { "Man", "!" },
-						},
-					},
-				}),
-			})
-			cmp.setup({
-				snippet = {
-					expand = function(args)
-						luasnip.lsp_expand(args.body)
-					end,
-				},
-				completion = { completeopt = "menu,menuone,noinsert" },
-
-				-- For an understanding of why these mappings were
-				-- chosen, you will need to read `:help ins-completion`
-				-- No, but seriously. Please read `:help ins-completion`, it is really good!
-				mapping = cmp.mapping.preset.insert({
-					-- Select the [n]ext item
-					["<C-n>"] = cmp.mapping.select_next_item(),
-					-- Select the [p]revious item
-					["<C-p>"] = cmp.mapping.select_prev_item(),
-
-					-- Scroll the documentation window [b]ack / [f]orward
-					["<C-b>"] = cmp.mapping.scroll_docs(-4),
-					["<C-f>"] = cmp.mapping.scroll_docs(4),
-
-					-- Accept ([y]es) the completion.
-					--  This will auto-import if your LSP supports it.
-					--  This will expand snippets if the LSP sent a snippet.
-					["<C-y>"] = cmp.mapping.confirm({ select = true }),
-
-					-- Manually trigger a completion from nvim-cmp.
-					--  Generally you don't need this, because nvim-cmp will display
-					--  completions whenever it has completion options available.
-					["<C-Space>"] = cmp.mapping.complete({}),
-
-					-- Think of <c-l> as moving to the right of your snippet expansion.
-					--  So if you have a snippet that's like:
-					--  function $name($args)
-					--    $body
-					--  end
-					--
-					-- <c-l> will move you to the right of each of the expansion locations.
-					-- <c-h> is similar, except moving you backwards.
-					["<C-l>"] = cmp.mapping(function()
-						if luasnip.expand_or_locally_jumpable() then
-							luasnip.expand_or_jump()
-						end
-					end, { "i", "s" }),
-					["<C-h>"] = cmp.mapping(function()
-						if luasnip.locally_jumpable(-1) then
-							luasnip.jump(-1)
-						end
-					end, { "i", "s" }),
-
-					-- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
-					--    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
-				}),
-				sources = {
-					{ name = "nvim_lsp" },
-					{ name = "luasnip" },
-					{ name = "path" },
-				},
-			})
-		end,
-	},
 	{
 		"akinsho/toggleterm.nvim",
 		version = "*",
@@ -1453,6 +1274,170 @@ require("lazy").setup({
 			hooks.register(hooks.type.SCOPE_HIGHLIGHT, hooks.builtin.scope_highlight_from_extmark)
 		end,
 	},
+	{ -- Autocompletion
+		"hrsh7th/nvim-cmp",
+		event = "InsertEnter",
+		dependencies = {
+			-- Snippet Engine & its associated nvim-cmp source
+			{
+				"L3MON4D3/LuaSnip",
+				build = (function()
+					-- Build Step is needed for regex support in snippets.
+					-- This step is not supported in many windows environments.
+					-- Remove the below condition to re-enable on windows.
+					-- if vim.fn.has("win32") == 1 or vim.fn.executable("make") == 0 then
+					-- 	return
+					-- end
+					return "make install_jsregexp"
+				end)(),
+				dependencies = {
+					-- `friendly-snippets` contains a variety of premade snippets.
+					--    See the README about individual language/framework/plugin snippets:
+					--    https://github.com/rafamadriz/friendly-snippets
+					{
+						"rafamadriz/friendly-snippets",
+						config = function()
+							local ls = require("luasnip")
+							-- some shorthands...
+							local s = ls.snippet
+							-- local sn = ls.snippet_node
+							local t = ls.text_node
+							local i = ls.insert_node
+							-- local f = ls.function_node
+							-- local c = ls.choice_node
+							-- local d = ls.dynamic_node
+							-- local r = ls.restore_node
+							-- local l = require("luasnip.extras").lambda
+							-- local rep = require("luasnip.extras").rep
+							-- local p = require("luasnip.extras").partial
+							-- local m = require("luasnip.extras").match
+							-- local n = require("luasnip.extras").nonempty
+							-- local dl = require("luasnip.extras").dynamic_lambda
+							-- local fmt = require("luasnip.extras.fmt").fmt
+							-- local fmta = require("luasnip.extras.fmt").fmta
+							-- local types = require("luasnip.util.types")
+							-- local conds = require("luasnip.extras.conditions")
+							-- local conds_expand = require("luasnip.extras.conditions.expand")
+							require("luasnip.loaders.from_vscode").lazy_load()
+							require("luasnip").add_snippets("python", {
+								s("cell", {
+									t({ "#%% #CELL:" }),
+									i(1, "Name Your Cell Here"),
+									t({ "<cell>", "" }),
+									i(2, "Enter Your Code"),
+									t({ "", "#</cell>" }),
+								}),
+								s("visi", {
+									t({ "from visidata import vd" }),
+								}),
+								s("vd", {
+									t("vd.view_pandas("),
+									i(1, "Df"),
+									t(")"),
+								}),
+							})
+							require("luasnip").add_snippets("lua", {
+								s("config", {
+									t({ "config = function()", "" }),
+									i(1, "  insert your config here."),
+									t({ "", "end" }),
+								}),
+							})
+						end,
+					},
+				},
+			},
+			"saadparwaiz1/cmp_luasnip",
+			-- Adds other completion capabilities.
+			--  nvim-cmp does not ship with all sources by default. They are split
+			--  into multiple repos for maintenance purposes.
+			"hrsh7th/cmp-nvim-lsp",
+			"hrsh7th/cmp-path",
+			"hrsh7th/cmp-cmdline",
+		},
+		config = function()
+			-- See `:help cmp`
+			local cmp = require("cmp")
+			local luasnip = require("luasnip")
+			luasnip.config.setup({})
+			cmp.setup.cmdline("/", {
+				mapping = cmp.mapping.preset.cmdline(),
+				source = { { name = "path" } },
+			})
+			cmp.setup.cmdline(":", {
+				mapping = cmp.mapping.preset.cmdline(),
+				sources = cmp.config.sources({
+					{ name = "path" },
+				}, {
+					{
+						name = "cmdline",
+						option = {
+							ignore_cmds = { "Man", "!" },
+						},
+					},
+				}),
+			})
+			cmp.setup({
+				snippet = {
+					expand = function(args)
+						luasnip.lsp_expand(args.body)
+					end,
+				},
+				completion = { completeopt = "menu,menuone,noinsert" },
+
+				-- For an understanding of why these mappings were
+				-- chosen, you will need to read `:help ins-completion`
+				-- No, but seriously. Please read `:help ins-completion`, it is really good!
+				mapping = cmp.mapping.preset.insert({
+					-- Select the [n]ext item
+					["<C-n>"] = cmp.mapping.select_next_item(),
+					-- Select the [p]revious item
+					["<C-p>"] = cmp.mapping.select_prev_item(),
+
+					-- Scroll the documentation window [b]ack / [f]orward
+					["<C-b>"] = cmp.mapping.scroll_docs(-4),
+					["<C-f>"] = cmp.mapping.scroll_docs(4),
+
+					-- Accept ([y]es) the completion.
+					--  This will auto-import if your LSP supports it.
+					--  This will expand snippets if the LSP sent a snippet.
+					["<C-y>"] = cmp.mapping.confirm({ select = true }),
+
+					-- Manually trigger a completion from nvim-cmp.
+					--  Generally you don't need this, because nvim-cmp will display
+					--  completions whenever it has completion options available.
+					["<C-Space>"] = cmp.mapping.complete({}),
+
+					-- Think of <c-l> as moving to the right of your snippet expansion.
+					--  So if you have a snippet that's like:
+					--  function $name($args)
+					--    $body
+					--  end
+					--
+					-- <c-l> will move you to the right of each of the expansion locations.
+					-- <c-h> is similar, except moving you backwards.
+					["<C-l>"] = cmp.mapping(function()
+						if luasnip.expand_or_locally_jumpable() then
+							luasnip.expand_or_jump()
+						end
+					end, { "i", "s" }),
+					["<C-h>"] = cmp.mapping(function()
+						if luasnip.locally_jumpable(-1) then
+							luasnip.jump(-1)
+						end
+					end, { "i", "s" }),
+
+					-- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
+					--    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
+				}),
+				sources = {
+					{ name = "nvim_lsp" },
+					{ name = "luasnip" },
+					{ name = "path" },
+				},
+			})
+		end,
+	},
 	{ "kmontocam/nvim-conda" },
 	{
 		"danymat/neogen",
@@ -1500,6 +1485,9 @@ require("lazy").setup({
 	require("wilsonchen.rainbowpairs"),
 	require("wilsonchen.neogit"),
 	require("wilsonchen.bookmark"),
+	require("wilsonchen.project"),
+	require("wilsonchen.dashboard"),
+	require("wilsonchen.session"),
 
 	-- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
 	--    This is the easiest way to modularize your config.
@@ -1530,7 +1518,6 @@ require("lazy").setup({
 })
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
--- TODO: Multi-Cursor
--- TODO: Customize Table Mode next cell keymap
--- TODO: Project Folder, Dashboard Enhancement
--- TODO: Git Integration
+-- TODO: Dashboard Enhancement: Add session/ different search options.
+-- TODO: Git Integration (Installed Neogit, need to learn how to pull and solve merge conflict)
+-- TODO: Enhance workflow by bookmark, Harpoon, and projects.
