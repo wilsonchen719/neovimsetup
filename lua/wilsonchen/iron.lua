@@ -41,7 +41,44 @@ return {
 			ignore_blank_lines = true, -- ignore blank lines when sending visual select lines
 			--Floating Version
 		})
-		vim.keymap.set("n", "<leader>rc", function()
+		local function intToLetter(n)
+			local alphabet = "abcdefghijklmnopqrstuvwxyz"
+			local upperAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+			if n >= 1 and n <= 26 then
+				return alphabet:sub(n, n)
+			elseif n >= 27 and n <= 52 then
+				return upperAlphabet:sub(n - 26, n - 26)
+			else
+				print("Can't do more than 52 lines.")
+			end
+		end
+
+		local function copy_paste_code_to_repl_line_by_line()
+			local start_line = vim.fn.getpos("'<")[2]
+			local end_line = vim.fn.getpos("'>")[2]
+			local buffer = vim.api.nvim_get_current_buf()
+			print(start_line)
+			print(end_line)
+			print(end_line - start_line)
+			vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, true, true), "n", false)
+			vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-w><C-j>", true, true, true), "n", false)
+			vim.api.nvim_feedkeys("i", "n", false)
+			vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<S-CR>", true, true, true), "", false)
+
+			for line_number = start_line, end_line do
+				local line_content = vim.api.nvim_buf_get_lines(buffer, line_number - 1, line_number, false)[1]
+				local register_str = intToLetter(line_number - start_line + 1)
+				vim.api.nvim_call_function("setreg", { register_str, line_content })
+				vim.api.nvim_feedkeys(
+					vim.api.nvim_replace_termcodes("<C-R>" .. register_str, true, true, true),
+					"n",
+					true
+				)
+				vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<CR>", true, true, true), "", false)
+			end
+		end
+
+		vim.keymap.set("n", "<S-CR>", function()
 			vim.api.nvim_feedkeys("vit", "n", false)
 			iron.visual_send()
 			vim.cmd("IronFocus")
@@ -49,12 +86,19 @@ return {
 			vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<CR>", true, true, true), "n", true)
 		end, { desc = "[R]un [C]ell" })
 
-		vim.keymap.set("v", "<leader>ic", function()
-			iron.visual_send()
-			vim.cmd("IronFocus")
-			vim.api.nvim_feedkeys("i", "n", false)
-			vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<CR>", true, true, true), "n", true)
-		end, { desc = "[I]ron [C]ell" })
+		-- If debug mode is on, then Shift + Enter becomes sending code to dap-repl.
+		-- If debug mode is off, then Shift + Enter will run iron.
+
+		vim.keymap.set("v", "<S-Cr>", function()
+			if _G.isNvimDapRunning then
+				copy_paste_code_to_repl_line_by_line()
+			else
+				iron.visual_send()
+				vim.cmd("IronFocus")
+				vim.api.nvim_feedkeys("i", "n", false)
+				vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<CR>", true, true, true), "n", true)
+			end
+		end, { desc = "Run Visually Selected Code in REPL" })
 
 		local function untoggle()
 			local ll = require("iron.lowlevel")
@@ -70,27 +114,10 @@ return {
 			end
 		end
 
-		-- local function back_to_script()
-		-- 	local ll = require("iron.lowlevel")
-		-- 	local meta = ll.get("python")
-		-- 	if ll.repl_exists(meta) then
-		-- 		local window = vim.fn.bufwinid(meta.bufnr)
-		-- 		if window ~= -1 then
-		-- 			vim.cmd('call feedkeys("\\<Esc>", "n")')
-		-- 			vim.cmd('call feedkeys("\\<Esc>", "n")')
-		-- 			vim.cmd("wincmd h")
-		-- 		end
-		-- 	end
-		-- end
-
 		vim.keymap.set("n", "<leader>ir", "<cmd>IronRestart<CR>", { desc = "[I]ron [R]estart" })
 		vim.keymap.set("n", "<leader>is", "<cmd>IronFocus<CR>", { desc = "[I]ron focu[S]" })
 		vim.keymap.set("n", "<leader>ih", function()
 			untoggle()
 		end, { desc = "[I]ron [H]ide" })
-
-		-- vim.keymap.set("t", "<ESC>", function()
-		-- 	back_to_script()
-		-- end)
 	end,
 }

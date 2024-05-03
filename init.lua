@@ -1,3 +1,6 @@
+_G.isZenMode = false
+_G.isNvimDapRunning = false
+_G.isGitDiff = false
 vim.g.mapleader = " "
 vim.g.have_nerd_font = true
 
@@ -90,6 +93,7 @@ vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Go to previous [D]
 vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Go to next [D]iagnostic message" })
 vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Show diagnostic [E]rror messages" })
 vim.keymap.set("n", "Q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
+vim.keymap.set("n", "<C-z>", "<cmd>ZenMode<CR>")
 
 -- Easiest Way to Escape Command Mode.
 vim.keymap.set("t", "<ESC>", function()
@@ -210,9 +214,73 @@ require("lazy").setup({
 	{
 		"folke/zen-mode.nvim",
 		event = "VimEnter",
-		config = function()
-			vim.keymap.set("n", "<C-z>", "<cmd>ZenMode<CR>")
-		end,
+		opts = {
+			window = {
+				backdrop = 0.95, -- shade the backdrop of the Zen window. Set to 1 to keep the same as Normal
+				-- height and width can be:
+				-- * an absolute number of cells when > 1
+				-- * a percentage of the width / height of the editor when <= 1
+				-- * a function that returns the width or the height
+				width = 120, -- width of the Zen window
+				height = 1, -- height of the Zen window
+				-- by default, no options are changed for the Zen window
+				-- uncomment any of the options below, or add other vim.wo options you want to apply
+				options = {
+					-- signcolumn = "no", -- disable signcolumn
+					-- number = false, -- disable number column
+					-- relativenumber = false, -- disable relative numbers
+					-- cursorline = false, -- disable cursorline
+					-- cursorcolumn = false, -- disable cursor column
+					-- foldcolumn = "0", -- disable fold column
+					-- list = false, -- disable whitespace characters
+				},
+			},
+			plugins = {
+				-- disable some global vim options (vim.o...)
+				-- comment the lines to not apply the options
+				options = {
+					enabled = true,
+					ruler = false, -- disables the ruler text in the cmd line area
+					showcmd = false, -- disables the command in the last line of the screen
+					-- you may turn on/off statusline in zen mode by setting 'laststatus'
+					-- statusline will be shown only if 'laststatus' == 3
+					laststatus = 3, -- turn off the statusline in zen mode
+				},
+				twilight = { enabled = true }, -- enable to start Twilight when zen mode opens
+				gitsigns = { enabled = false }, -- disables git signs
+				tmux = { enabled = false }, -- disables the tmux statusline
+				-- this will change the font size on kitty when in zen mode
+				-- to make this work, you need to set the following kitty options:
+				-- - allow_remote_control socket-only
+				-- - listen_on unix:/tmp/kitty
+				kitty = {
+					enabled = false,
+					font = "+4", -- font size increment
+				},
+				-- this will change the font size on alacritty when in zen mode
+				-- requires  Alacritty Version 0.10.0 or higher
+				-- uses `alacritty msg` subcommand to change font size
+				alacritty = {
+					enabled = false,
+					font = "14", -- font size
+				},
+				-- this will change the font size on wezterm when in zen mode
+				-- See alse also the Plugins/Wezterm section in this projects README
+				wezterm = {
+					enabled = false,
+					-- can be either an absolute font size or the number of incremental steps
+					font = "+4", -- (10% increase per step)
+				},
+			},
+			-- callback where you can add custom code when the Zen window opens
+			on_open = function(win)
+				_G.isZenMode = true
+			end,
+			-- callback where you can add custom code when the Zen window closes
+			on_close = function()
+				_G.isZenMode = false
+			end,
+		},
 	},
 	"sharkdp/fd",
 	{
@@ -411,12 +479,16 @@ require("lazy").setup({
 			vim.keymap.set("n", "<leader>sk", builtin.keymaps, { desc = "[S]earch [K]eymaps" })
 			vim.keymap.set("n", "<leader>sf", builtin.find_files, { desc = "[S]earch [F]iles" })
 			--vim.keymap.set("n", "<leader>ss", builtin.builtin, { desc = "[S]earch [S]elect Telescope" })
-			vim.keymap.set("n", "<leader>sw", builtin.grep_string, { desc = "[S]earch current [W]ord" })
+			-- vim.keymap.set("n", "<leader>sw", builtin.grep_string, { desc = "[S]earch current [W]ord" })
 			vim.keymap.set("n", "<leader>sg", builtin.live_grep, { desc = "[S]earch by [G]rep" })
 			vim.keymap.set("n", "<leader>sd", builtin.diagnostics, { desc = "[S]earch [D]iagnostics" })
 			vim.keymap.set("n", "<leader>sr", builtin.resume, { desc = "[S]earch [R]esume" })
 			vim.keymap.set("n", "<leader>s.", builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
 			vim.keymap.set("n", "<leader>ss", builtin.lsp_document_symbols, { desc = "[S]earch [S]ymbols" })
+			-- Although not related to telescope, but I put the session manager search here.
+			vim.keymap.set("n", "<leader>sw", function()
+				vim.cmd("SessionManager load_session")
+			end, { desc = "[S]earch [W]orkspace" })
 			-- Slightly advanced example of overriding default behavior and theme
 			vim.keymap.set("n", "<leader>/", function()
 				-- You can pass additional configuration to Telescope to change the theme, layout, etc.
@@ -677,6 +749,15 @@ require("lazy").setup({
 			})
 		end,
 	},
+	{
+		"letieu/harpoon-lualine",
+		dependencies = {
+			{
+				"ThePrimeagen/harpoon",
+				branch = "harpoon2",
+			},
+		},
+	},
 	{ -- LSP Configuration & Plugins
 		"neovim/nvim-lspconfig",
 		dependencies = {
@@ -754,12 +835,12 @@ require("lazy").setup({
 
 					-- Fuzzy find all the symbols in your current document.
 					--  Symbols are things like variables, functions, types, etc.
-					map("<leader>ds", require("telescope.builtin").lsp_document_symbols, "[D]ocument [S]ymbols")
+					-- map("<leader>ds", require("telescope.builtin").lsp_document_symbols, "[D]ocument [S]ymbols")
 
 					-- Fuzzy find all the symbols in your current workspace.
 					--  Similar to document symbols, except searches over your entire project.
 					map(
-						"<leader>ws",
+						"<leader>sS",
 						require("telescope.builtin").lsp_dynamic_workspace_symbols,
 						"[W]orkspace [S]ymbols"
 					)
@@ -928,7 +1009,7 @@ require("lazy").setup({
 		config = function()
 			require("toggleterm").setup({
 				size = 80,
-				open_mapping = [[<C-\>]],
+				-- open_mapping = [[<C-\>]],
 				hide_numbers = true,
 				shade_dfiletypes = {},
 				shading_factor = 2,
@@ -947,19 +1028,13 @@ require("lazy").setup({
 					},
 				},
 			})
-			local function visual_send()
-				if vim.bo.filetype == "python" then
-					vim.api.nvim_feedkeys("yit", "n", false)
-					require("toggleterm").exec("%paste", 1)
-				else
-					-- allback doesn't work
-					require("toggleterm").send_lines_to_terminal("visual_selection", true, { 1 })
-				end
-			end
-			vim.keymap.set("n", "<leader>rr", function()
-				visual_send()
-			end)
 		end,
+		vim.keymap.set("n", "<C-\\>", function()
+			if _G.isZenMode then
+				require("zen-mode").close()
+			end
+			vim.cmd("ToggleTerm")
+		end),
 	},
 	{ -- You can easily change to a different colorscheme.
 		-- Change the name of the colorscheme plugin below, and then
@@ -1330,6 +1405,8 @@ require("lazy").setup({
 								s("visi", {
 									t({ "from visidata import vd" }),
 								}),
+							})
+							require("luasnip").add_snippets("all", {
 								s("vd", {
 									t("vd.view_pandas("),
 									i(1, "Df"),
@@ -1488,6 +1565,10 @@ require("lazy").setup({
 	require("wilsonchen.project"),
 	require("wilsonchen.dashboard"),
 	require("wilsonchen.session"),
+	require("wilsonchen.focus"),
+	require("wilsonchen.copilot"),
+	require("wilsonchen.lualine"),
+	--	require("lualine"),
 
 	-- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
 	--    This is the easiest way to modularize your config.
@@ -1518,6 +1599,6 @@ require("lazy").setup({
 })
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
--- TODO: Dashboard Enhancement: Add session/ different search options.
--- TODO: Git Integration (Installed Neogit, need to learn how to pull and solve merge conflict)
--- TODO: Enhance workflow by bookmark, Harpoon, and projects.
+-- TODO: Git Integration (Need to learn how to pull and solve merge conflict)
+-- TODO: Enhance workflow by making harpoon can stay in session.
+-- TODO: Github copoilt? Buy Copilot??? (I think I can do that.)

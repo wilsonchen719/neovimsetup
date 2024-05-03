@@ -7,43 +7,6 @@
 -- kickstart.nvim and not kitchen-sink.nvim ;)
 
 -- NOTE: Customized functions to send multilple line to dap-repl
-local function intToLetter(n)
-	local alphabet = "abcdefghijklmnopqrstuvwxyz"
-	local upperAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	if n >= 1 and n <= 26 then
-		return alphabet:sub(n, n)
-	elseif n >= 27 and n <= 52 then
-		return upperAlphabet:sub(n - 26, n - 26)
-	else
-		print("Can't do more than 52 lines.")
-	end
-end
-
-local function copy_paste_code_to_repl_line_by_line()
-	local start_line = vim.fn.getpos("'<")[2]
-	local end_line = vim.fn.getpos("'>")[2]
-	local buffer = vim.api.nvim_get_current_buf()
-	print(start_line)
-	print(end_line)
-	print(end_line - start_line)
-	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, true, true), "n", false)
-	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-w><C-j>", true, true, true), "n", false)
-	vim.api.nvim_feedkeys("i", "n", false)
-	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<S-CR>", true, true, true), "", false)
-
-	for line_number = start_line, end_line do
-		local line_content = vim.api.nvim_buf_get_lines(buffer, line_number - 1, line_number, false)[1]
-		local register_str = intToLetter(line_number - start_line + 1)
-		vim.api.nvim_call_function("setreg", { register_str, line_content })
-		vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-R>" .. register_str, true, true, true), "n", true)
-		vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<CR>", true, true, true), "", false)
-	end
-end
-
-vim.keymap.set("v", "<S-Cr>", function()
-	copy_paste_code_to_repl_line_by_line()
-end)
-
 return { {
 	-- NOTE: Yes, you can install new plugins here!
 	"mfussenegger/nvim-dap",
@@ -164,17 +127,26 @@ return { {
 		}
 		-- Basic debugging keymaps, feel free to change to your liking!
 		vim.keymap.set("n", "<F5>", function()
+			if _G.isZenMode then
+				require("zen-mode").close()
+			end
+			-- require("focus").setup({enable = false})
+			require("focus").focus_disable()
+
 			dap.continue()
 			end, { desc = "Debug: Start/Continue" })
 		vim.keymap.set("n", "<F2>", dap.step_into, { desc = "Debug: Step Into" })
 		vim.keymap.set("n", "<F3>", goto.next, { desc = "Debug: Jump Breakpoint" })
 		vim.keymap.set("n", "<F4>", goto.stopped, { desc = "Debug: Jump To Stopped Line" })
-		vim.keymap.set("n", "<S-F5>", function() dap.terminate() end, { desc = "Debug: Terminate" })
+		vim.keymap.set("n", "<S-F5>", function() 
+			dap.terminate()
+			require("focus").focus_enable()
+		end, { desc = "Debug: Terminate" })
 		-- vim.keymap.set("n", "<F8>", function()
 		-- 	dap.set_breakpoint(vim.fn.input("Breakpoint condition: "))
 		-- 	end, { desc = "Debug: Set Breakpoint" })
-		vim.keymap.set("n", "<leader>ep", function() vim.cmd('lua require("dapui").eval()') end, {desc = "Debug: [EV]aluate"})
-		vim.keymap.set("v", "<leader>ep", function() vim.cmd('lua require("dapui").eval()') end, {desc = "Debug: [EV]aluate"})
+		vim.keymap.set("n", "<leader>de", function() vim.cmd('lua require("dapui").eval()') end, {desc = "[D]ebug [E]valuate"})
+		vim.keymap.set("v", "<leader>de", function() vim.cmd('lua require("dapui").eval()') end, {desc = "[D]ebug [E]aluate"})
 		-- Dap UI setup
 		-- For more information, see |:help nvim-dap-ui|
 		dapui.setup({
@@ -194,9 +166,13 @@ return { {
 		sign("DapLogPoint", { text = "◆", texthl = "DapLogPoint", linehl = "", numhl = ""})
 		sign('DapStopped', { text='', texthl='DapStopped', linehl='DapStopped', numhl= 'DapStopped' })
 
-		dap.listeners.after.event_initialized["dapui_config"] = dapui.open
-		dap.listeners.before.event_terminated["dapui_config"] = dapui.close
-		dap.listeners.before.event_exited["dapui_config"] = dapui.close
+		dap.listeners.after.event_initialized["dapui_config"] = function() 
+			dapui.open()
+			_G.isNvimDapRunning = true
+		end
+		dap.listeners.before.event_terminated["dapui_config"] = function () dapui.close() _G.isNvimDapRunning = false end
+		dap.listeners.before.event_exited["dapui_config"] = function() dapui.close() _G.isNvimDapRunning = false end
+
 
 		-- Install golang specific config
 		--require("dap-go").setup()

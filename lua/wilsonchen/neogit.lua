@@ -7,5 +7,16 @@ return {
 		-- Only one of these is needed, not both.
 		"nvim-telescope/telescope.nvim", -- optional
 	},
-	config = true,
+	config = function()
+		local neogit = require("neogit")
+		neogit.setup({})
+		vim.keymap.set("n", "<leader>gs", function()
+			vim.cmd("Neogit kind=vsplit")
+		end, { desc = "[G]it [S]tatus" })
+
+		vim.keymap.set("n", "<leader>gd", function()
+			require("focus").focus_disable()
+			vim.cmd("DiffviewOpen")
+		end, { desc = "[G]it [D]iff" })
+	end,
 }
