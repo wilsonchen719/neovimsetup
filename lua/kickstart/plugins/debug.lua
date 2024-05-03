@@ -130,8 +130,6 @@ return { {
 			if _G.isZenMode then
 				require("zen-mode").close()
 			end
-			-- require("focus").setup({enable = false})
-			require("focus").focus_disable()
 
 			dap.continue()
 			end, { desc = "Debug: Start/Continue" })
@@ -140,7 +138,6 @@ return { {
 		vim.keymap.set("n", "<F4>", goto.stopped, { desc = "Debug: Jump To Stopped Line" })
 		vim.keymap.set("n", "<S-F5>", function() 
 			dap.terminate()
-			require("focus").focus_enable()
 		end, { desc = "Debug: Terminate" })
 		-- vim.keymap.set("n", "<F8>", function()
 		-- 	dap.set_breakpoint(vim.fn.input("Breakpoint condition: "))
@@ -173,10 +170,17 @@ return { {
 		dap.listeners.before.event_terminated["dapui_config"] = function () dapui.close() _G.isNvimDapRunning = false end
 		dap.listeners.before.event_exited["dapui_config"] = function() dapui.close() _G.isNvimDapRunning = false end
 
+		-- NOTE: Below is a nice solution for sending multiline into dap-repl. But need to wait until Neovim 0.10 works.
 
+		-- vim.keymap.set("x", "<leader>di", function()
+		-- 	local lines = vim.fn.getregion(vim.fn.getpos("."), vim.fn.getpos("v"))
+		-- 	dap.repl.open()
+		-- 	dap.repl.execute(table.concat(lines, "\n"))
+		-- end)
 		-- Install golang specific config
 		--require("dap-go").setup()
 		--require("dap-python").setup(path)
+
 	end, },
 	{
 		"wilsonchen719/visidata.nvim",

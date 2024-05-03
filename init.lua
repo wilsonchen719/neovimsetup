@@ -1,6 +1,5 @@
 _G.isZenMode = false
 _G.isNvimDapRunning = false
-_G.isGitDiff = false
 vim.g.mapleader = " "
 vim.g.have_nerd_font = true
 
@@ -26,7 +25,7 @@ vim.cmd([[autocmd FileType * set formatoptions-=ro]])
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = "a"
--- Change default shell to powershell
+-- Change default shell to powershellfolke/edgy.nvim
 vim.opt.shell = "C:/Users/wilsonchen/AppData/Local/Microsoft/WindowsApps/Microsoft.PowerShell_8wekyb3d8bbwe/pwsh.exe"
 vim.opt.shell = "pwsh"
 vim.opt.shellcmdflag = "-nologo -noprofile -ExecutionPolicy RemoteSigned -command"
@@ -132,7 +131,13 @@ vim.keymap.set("n", "<C-h>", "<C-w><C-h>", { desc = "Move focus to the left wind
 vim.keymap.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move focus to the right window" })
 vim.keymap.set("n", "<C-j>", "<C-w><C-j>", { desc = "Move focus to the lower window" })
 vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
-vim.keymap.set("n", "<leader>pv", "<cmd>Oil<CR>", { noremap = true, silent = true })
+vim.keymap.set("n", "<leader>o", function()
+	vim.cmd("vsplit | wincmd l | vertical resize 80")
+	require("oil").open()
+end, { noremap = true, silent = true })
+vim.keymap.set("n", "<leader>pv", function()
+	require("oil").open()
+end, { noremap = true, silent = true })
 vim.keymap.set("n", "<C-w>+", "<cmd>30winc ><CR>", { noremap = true, silent = true })
 vim.keymap.set("n", "<C-w>-", "<cmd>30winc <<CR>", { noremap = true, silent = true })
 vim.keymap.set("n", "<C-w><", "<cmd>10winc -<CR>", { noremap = true, silent = true })
@@ -1565,7 +1570,6 @@ require("lazy").setup({
 	require("wilsonchen.project"),
 	require("wilsonchen.dashboard"),
 	require("wilsonchen.session"),
-	require("wilsonchen.focus"),
 	require("wilsonchen.copilot"),
 	require("wilsonchen.lualine"),
 	--	require("lualine"),
