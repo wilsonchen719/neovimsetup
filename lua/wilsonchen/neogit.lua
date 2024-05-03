@@ -15,7 +15,6 @@ return {
 		end, { desc = "[G]it [S]tatus" })
 
 		vim.keymap.set("n", "<leader>gd", function()
-			require("focus").focus_disable()
 			vim.cmd("DiffviewOpen")
 		end, { desc = "[G]it [D]iff" })
 	end,
