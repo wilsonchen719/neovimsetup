@@ -57,9 +57,9 @@ return {
 			local start_line = vim.fn.getpos("'<")[2]
 			local end_line = vim.fn.getpos("'>")[2]
 			local buffer = vim.api.nvim_get_current_buf()
-			print(start_line)
-			print(end_line)
-			print(end_line - start_line)
+			-- print(start_line)
+			-- print(end_line)
+			-- print(end_line - start_line)
 			vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, true, true), "n", false)
 			vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-w><C-j>", true, true, true), "n", false)
 			vim.api.nvim_feedkeys("i", "n", false)

@@ -1,3 +1,18 @@
+-- if vim.g.neovide then
+-- 	local alpha = function()
+-- 		return string.format("%x", math.floor((255 * vim.g.transparency) or 0.8))
+-- 	end
+-- 	vim.o.guifont = "FiraCode Nerd Font:h12"
+-- 	vim.g.neovide_transparency = 0.9
+-- 	vim.g.transparency = 0.8
+-- 	vim.g.neovide_background_color = "#0f1117" .. alpha()
+-- 	vim.g.neovide_window_blurred = false
+-- 	vim.g.neovide_floating_blurred = false
+-- 	vim.g.neovide_floating_shadow = false
+-- 	vim.g.neovide_floating_blur_amount_x = 0
+-- 	vim.g.neovide_padding_left = 250
+-- 	vim.g.neovide_floating_blur_amount_y = 0
+-- end
 _G.isZenMode = false
 _G.isNvimDapRunning = false
 vim.g.mapleader = " "
@@ -92,8 +107,22 @@ vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Go to previous [D]
 vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Go to next [D]iagnostic message" })
 vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Show diagnostic [E]rror messages" })
 vim.keymap.set("n", "Q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
-vim.keymap.set("n", "<C-z>", "<cmd>ZenMode<CR>")
 
+-- if vim.g.neovide then
+-- 	vim.keymap.set("n", "<C-z>", function()
+-- 		if _G.isZenMode then
+-- 			vim.cmd("lua vim.g.neovide_padding_left = 0")
+-- 			_G.isZenMode = false
+-- 		else
+-- 			vim.cmd("lua vim.g.neovide_padding_left = 250")
+-- 			_G.isZenMode = true
+-- 		end
+-- 	end)
+-- else
+-- 	vim.keymap.set("n", "<C-z>", "<cmd>ZenMode<CR>")
+-- end
+
+vim.keymap.set("n", "<C-z>", "<cmd>ZenMode<CR>")
 -- Easiest Way to Escape Command Mode.
 vim.keymap.set("t", "<ESC>", function()
 	vim.cmd('call feedkeys("\\<Esc>", "n")')
@@ -138,10 +167,10 @@ end, { noremap = true, silent = true })
 vim.keymap.set("n", "<leader>pv", function()
 	require("oil").open()
 end, { noremap = true, silent = true })
-vim.keymap.set("n", "<C-w>+", "<cmd>30winc ><CR>", { noremap = true, silent = true })
-vim.keymap.set("n", "<C-w>-", "<cmd>30winc <<CR>", { noremap = true, silent = true })
-vim.keymap.set("n", "<C-w><", "<cmd>10winc -<CR>", { noremap = true, silent = true })
-vim.keymap.set("n", "<C-w>>", "<cmd>10winc +<CR>", { noremap = true, silent = true })
+vim.keymap.set("n", "+", "<cmd>30winc ><CR>", { noremap = true, silent = true })
+vim.keymap.set("n", "-", "<cmd>30winc <<CR>", { noremap = true, silent = true })
+vim.keymap.set("n", "<C-w>-", "<cmd>10winc -<CR>", { noremap = true, silent = true })
+vim.keymap.set("n", "<C-w>+", "<cmd>10winc +<CR>", { noremap = true, silent = true })
 -- [[ Basic Autocommands ]
 --  See `:help lua-guide-`
 
@@ -1521,6 +1550,7 @@ require("lazy").setup({
 		end,
 	},
 	{ "kmontocam/nvim-conda" },
+	-- "ubaldot/vim-conda-activate",
 	{
 		"danymat/neogen",
 		config = function()
@@ -1568,6 +1598,7 @@ require("lazy").setup({
 	require("wilsonchen.neogit"),
 	require("wilsonchen.bookmark"),
 	require("wilsonchen.project"),
+	require("wilsonchen.dashboard"),
 	require("wilsonchen.dashboard"),
 	require("wilsonchen.session"),
 	require("wilsonchen.copilot"),

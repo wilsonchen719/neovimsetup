@@ -32,7 +32,26 @@ return {
 				winhighlight = false, -- Auto highlighting for focussed/unfocussed windows
 			},
 		})
-		local ignore_filetypes = { "neo-tree" }
+		local ignore_filetypes = {
+			{
+				"help",
+				"alpha",
+				"dashboard",
+				"neo-tree",
+				"undotree",
+				"diff",
+				"oil",
+				"lua",
+				"Trouble",
+				"trouble",
+				"lazy",
+				"mason",
+				"neogit",
+				"notify",
+				"toggleterm",
+				"lazyterm",
+			},
+		}
 		local ignore_buftypes = { "nofile", "prompt", "popup" }
 
 		local augroup = vim.api.nvim_create_augroup("FocusDisable", { clear = true })

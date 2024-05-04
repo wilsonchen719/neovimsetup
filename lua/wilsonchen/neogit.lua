@@ -14,8 +14,8 @@ return {
 			vim.cmd("Neogit kind=vsplit")
 		end, { desc = "[G]it [S]tatus" })
 
-		vim.keymap.set("n", "<leader>gd", function()
+		vim.keymap.set("n", "<leader>gf", function()
 			vim.cmd("DiffviewOpen")
-		end, { desc = "[G]it [D]iff" })
+		end, { desc = "[G]it Dif[f]" })
 	end,
 }
