@@ -151,6 +151,11 @@ return { {
 			--    Feel free to remove or use ones that you like more! :)
 			--    Don't feel like these are good choices.
 			icons = { expanded = "▾", collapsed = "▸", current_frame = "*" },
+			layouts = {
+				{elements = {"scopes","breakpoints","stacks", "watches"}, size = 40, position = "left"},
+				{elements = {"repl"}, size = 0.25, position = "bottom"}
+			}
+			
 		})
 
 		-- Toggle to see last session result. Without this, you can't see session output in case of unhandled exception.
@@ -170,7 +175,7 @@ return { {
 		dap.listeners.before.event_terminated["dapui_config"] = function () dapui.close() _G.isNvimDapRunning = false end
 		dap.listeners.before.event_exited["dapui_config"] = function() dapui.close() _G.isNvimDapRunning = false end
 
-		-- NOTE: Below is a nice solution for sending multiline into dap-repl. But need to wait until Neovim 0.10 works.
+		-- NOTE: Below is a nice solution for sending multiline into dap-repl.
 
 		-- vim.keymap.set("x", "<leader>di", function()
 		-- 	local lines = vim.fn.getregion(vim.fn.getpos("."), vim.fn.getpos("v"))

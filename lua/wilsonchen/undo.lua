@@ -3,9 +3,14 @@ return {
 		"mbbill/undotree",
 		config = function()
 			vim.keymap.set("n", "<leader>u", function()
-				if _G.isZenMode then
+				if _G.isZenMode and not vim.g.neovide then
 					vim.cmd("ZenMode")
 				end
+				if _G.isZenMode and vim.g.neovide then
+					vim.cmd("lua vim.g.neovide_padding_left = 0")
+					_G.isZenMode = false
+				end
+
 				vim.cmd.UndotreeToggle()
 			end, { desc = "Toggle [U]ndotree" })
 		end,

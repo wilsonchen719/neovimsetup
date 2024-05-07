@@ -1,22 +1,29 @@
--- if vim.g.neovide then
--- 	local alpha = function()
--- 		return string.format("%x", math.floor((255 * vim.g.transparency) or 0.8))
--- 	end
--- 	vim.o.guifont = "FiraCode Nerd Font:h12"
--- 	vim.g.neovide_transparency = 0.9
--- 	vim.g.transparency = 0.8
--- 	vim.g.neovide_background_color = "#0f1117" .. alpha()
--- 	vim.g.neovide_window_blurred = false
--- 	vim.g.neovide_floating_blurred = false
--- 	vim.g.neovide_floating_shadow = false
--- 	vim.g.neovide_floating_blur_amount_x = 0
--- 	vim.g.neovide_padding_left = 250
--- 	vim.g.neovide_floating_blur_amount_y = 0
--- end
 _G.isZenMode = false
 _G.isNvimDapRunning = false
+_G.zenModeWidth = 450
 vim.g.mapleader = " "
 vim.g.have_nerd_font = true
+
+if vim.g.neovide then
+	local alpha = function()
+		return string.format("%x", math.floor((255 * vim.g.transparency) or 0.8))
+	end
+	vim.o.guifont = "FiraCode Nerd Font:h11"
+	vim.g.neovide_transparency = 0.90
+	vim.g.transparency = 0.8
+	vim.g.neovide_background_color = "#0f1117" .. alpha()
+	vim.g.neovide_window_blurred = true
+	vim.g.neovide_floating_blurred = true
+	vim.g.neovide_floating_shadow = true
+	vim.g.neovide_floating_blur_amount_x = 2.0
+	vim.g.neovide_floating_blur_amount_y = 2.0
+	-- vim.g.neovide_padding_left = 300
+	vim.g.neovide_floating_shadow = true
+	vim.g.neovide_floating_z_height = 10
+	vim.g.neovide_light_angle_degrees = 45
+	vim.g.neovide_light_radius = 5
+	vim.g.neovide_show_border = true
+end
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -104,25 +111,25 @@ vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
 
 -- Diagnostic keymaps
 vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Go to previous [D]iagnostic message" })
-vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Go to next [D]iagnostic message" })
+vim.keymap.set("n", "\\d", vim.diagnostic.goto_next, { desc = "Go to next [D]iagnostic message" })
 vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Show diagnostic [E]rror messages" })
 vim.keymap.set("n", "Q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
 
--- if vim.g.neovide then
--- 	vim.keymap.set("n", "<C-z>", function()
--- 		if _G.isZenMode then
--- 			vim.cmd("lua vim.g.neovide_padding_left = 0")
--- 			_G.isZenMode = false
--- 		else
--- 			vim.cmd("lua vim.g.neovide_padding_left = 250")
--- 			_G.isZenMode = true
--- 		end
--- 	end)
--- else
--- 	vim.keymap.set("n", "<C-z>", "<cmd>ZenMode<CR>")
--- end
+if vim.g.neovide then
+	vim.keymap.set("n", "<C-z>", function()
+		if _G.isZenMode then
+			vim.cmd("lua vim.g.neovide_padding_left = 0")
+			_G.isZenMode = false
+		else
+			vim.cmd(string.format("lua vim.g.neovide_padding_left = %d", _G.zenModeWidth))
+			_G.isZenMode = true
+		end
+	end)
+else
+	vim.keymap.set("n", "<C-z>", "<cmd>ZenMode<CR>")
+end
+-- vim.keymap.set("n", "<C-z>", "<cmd>ZenMode<CR>")
 
-vim.keymap.set("n", "<C-z>", "<cmd>ZenMode<CR>")
 -- Easiest Way to Escape Command Mode.
 vim.keymap.set("t", "<ESC>", function()
 	vim.cmd('call feedkeys("\\<Esc>", "n")')
@@ -144,8 +151,19 @@ vim.keymap.set("n", "n", "nzzzv")
 vim.keymap.set("n", "N", "Nzzzv")
 vim.keymap.set("x", "p", '"_dP')
 --Quick Safe
-vim.keymap.set("n", "q", "<cmd>wq<CR>", { desc = "Save and Quit" })
+vim.keymap.set("n", "<leader>q", function()
+	local save_and_quite = function()
+		vim.cmd("wq")
+	end
+	local status, err = pcall(save_and_quite)
+	if not status then
+		vim.cmd("q")
+	end
+end, { desc = "Save and Quit" })
 
+--local Path = require("plenary.path")
+--local current_directory = Path:new("."):absolute()
+--print(current_directory)
 -- TIP: Disable arrow keys in normal mode
 -- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
 -- vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
@@ -161,6 +179,11 @@ vim.keymap.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move focus to the right win
 vim.keymap.set("n", "<C-j>", "<C-w><C-j>", { desc = "Move focus to the lower window" })
 vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
 vim.keymap.set("n", "<leader>o", function()
+	-- If we are in Neovide and in my defined zen mode. (Then turn off padding.)
+	if _G.isZenMode and vim.g.neovide then
+		vim.cmd("lua vim.g.neovide_padding_left = 0")
+		_G.isZenMode = false
+	end
 	vim.cmd("vsplit | wincmd l | vertical resize 80")
 	require("oil").open()
 end, { noremap = true, silent = true })
@@ -190,7 +213,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 	pattern = "*.py",
 	group = "AutoFormat",
 	callback = function()
-		vim.cmd("silent !black --quiet %")
+		vim.cmd("silent !black --quiet --line-length 120%")
 		vim.cmd("edit")
 	end,
 })
@@ -342,9 +365,9 @@ require("lazy").setup({
 			})
 			require("notify").setup({
 				background_colour = "#000000",
-				on_open = function(win)
-					vim.api.nvim_win_set_config(win, { focusable = false })
-				end,
+				-- on_open = function(win)
+				-- 	vim.api.nvim_win_set_config(win, { focusable = false })
+				-- end,
 			})
 		end,
 	},
@@ -488,7 +511,7 @@ require("lazy").setup({
 			-- [[ Configure Telescope ]]
 			-- See `:help telescope` and `:help telescope.setup()`
 			require("telescope").setup({
-				-- You can put your default mappings / updates / etc. in here
+				-- You can put your default mappings / updates / etccopeFuzzyCommandSearch) in here
 				--  All the info you're looking for is in `:help telescope.setup()`
 				--
 				-- defaults = {
@@ -511,13 +534,19 @@ require("lazy").setup({
 			local builtin = require("telescope.builtin")
 			vim.keymap.set("n", "<leader>sh", builtin.help_tags, { desc = "[S]earch [H]elp" })
 			vim.keymap.set("n", "<leader>sk", builtin.keymaps, { desc = "[S]earch [K]eymaps" })
-			vim.keymap.set("n", "<leader>sf", builtin.find_files, { desc = "[S]earch [F]iles" })
+			vim.keymap.set("n", "<leader>sf", function()
+				-- require("harpoon"):list():add()
+				builtin.find_files()
+			end, { desc = "[S]earch [F]iles" })
 			--vim.keymap.set("n", "<leader>ss", builtin.builtin, { desc = "[S]earch [S]elect Telescope" })
 			-- vim.keymap.set("n", "<leader>sw", builtin.grep_string, { desc = "[S]earch current [W]ord" })
 			vim.keymap.set("n", "<leader>sg", builtin.live_grep, { desc = "[S]earch by [G]rep" })
 			vim.keymap.set("n", "<leader>sd", builtin.diagnostics, { desc = "[S]earch [D]iagnostics" })
 			vim.keymap.set("n", "<leader>sr", builtin.resume, { desc = "[S]earch [R]esume" })
-			vim.keymap.set("n", "<leader>s.", builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
+			vim.keymap.set("n", "<leader>s.", function()
+				builtin.oldfiles()
+				-- require("harpoon"):list():add()
+			end, { desc = "[S]earch [F]iles" })
 			vim.keymap.set("n", "<leader>ss", builtin.lsp_document_symbols, { desc = "[S]earch [S]ymbols" })
 			-- Although not related to telescope, but I put the session manager search here.
 			vim.keymap.set("n", "<leader>sw", function()
@@ -548,7 +577,8 @@ require("lazy").setup({
 				builtin.find_files({ cwd = vim.fn.stdpath("data") })
 			end, { desc = "[S]earch Neovim pl[u]gins" })
 			vim.keymap.set("n", "<leader>sp", function()
-				require("telescope").extensions.projects.projects({})
+				vim.cmd("SessionManager load_session")
+				require("harpoon"):setup()
 			end, { desc = "[S]earch [P]rojects" })
 		end,
 	},
@@ -725,24 +755,6 @@ require("lazy").setup({
 		dependencies = { "nvim-lua/plenary.nvim" },
 		config = function()
 			local harpoon = require("harpoon")
-			harpoon.setup({})
-			local function toggle_telescope(harpoon_files)
-				local file_paths = {}
-				for _, item in ipairs(harpoon_files.items) do
-					table.insert(file_paths, item.value)
-				end
-
-				require("telescope.pickers")
-					.new({}, {
-						prompt_title = "Harpoon",
-						finder = require("telescope.finders").new_table({
-							results = file_paths,
-						}),
-						previewer = conf.file_previewer({}),
-						sorter = conf.generic_sorter({}),
-					})
-					:find()
-			end
 
 			vim.keymap.set("n", "<C-e>", function()
 				harpoon.ui:toggle_quick_menu(harpoon:list())
@@ -962,7 +974,7 @@ require("lazy").setup({
 				pyright = {
 					settings = {
 						python = {
-							analysis = { typeCheckingMode = "off" },
+							analysis = { typeCheckingMode = "Basic" },
 						},
 					},
 				},
@@ -1070,121 +1082,6 @@ require("lazy").setup({
 			vim.cmd("ToggleTerm")
 		end),
 	},
-	{ -- You can easily change to a different colorscheme.
-		-- Change the name of the colorscheme plugin below, and then
-		-- change the command in the config to whatever the name of that colorscheme is.
-		--
-		-- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-		"folke/tokyonight.nvim",
-		priority = 1000, -- Make sure to load this before all the other start plugins.
-		--
-		-- init = function()
-		-- 	-- Load the colorscheme here.
-		-- 	-- Like many other themes, this one has different styles, and you could load
-		-- 	-- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-		-- 	-- Set Backgroun to transparent
-		no_italic = true,
-		no_bold = true,
-		init = function()
-			vim.cmd.colorscheme("tokyonight-moon")
-			vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
-			vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
-			vim.api.nvim_set_hl(0, "LineNr", { fg = "#7f7f7f" })
-			vim.cmd.hi("Comment gui=none")
-		end,
-	},
-
-	-- Highlight todo, notes, etc in comments
-	-- ,
-	-- {
-	-- 	"Mofiqul/dracula.nvim",
-	-- 	opts = { colorscheme = "dracula" },
-	-- 	config = function()
-	-- 		local dracula = require("dracula")
-	-- 		dracula.setup({
-	-- 			-- customize dracula color palette
-	-- 			colors = {
-	-- 				bg = "#282A36",
-	-- 				fg = "#F8F8F2",
-	-- 				selection = "#44475A",
-	-- 				comment = "#6272A4",
-	-- 				red = "#FF5555",
-	-- 				orange = "#FFB86C",
-	-- 				yellow = "#F1FA8C",
-	-- 				green = "#50fa7b",
-	-- 				purple = "#BD93F9",
-	-- 				cyan = "#8BE9FD",
-	-- 				pink = "#FF79C6",
-	-- 				bright_red = "#FF6E6E",
-	-- 				bright_green = "#69FF94",
-	-- 				bright_yellow = "#FFFFA5",
-	-- 				bright_blue = "#D6ACFF",
-	-- 				bright_magenta = "#FF92DF",
-	-- 				bright_cyan = "#A4FFFF",
-	-- 				bright_white = "#FFFFFF",
-	-- 				menu = "#21222C",
-	-- 				visual = "#3E4452",
-	-- 				gutter_fg = "#4B5263",
-	-- 				nontext = "#3B4048",
-	-- 				white = "#ABB2BF",
-	-- 				black = "#191A21",
-	-- 			},
-	-- 			-- show the '~' characters after the end of buffers
-	-- 			show_end_of_buffer = true, -- default false
-	-- 			-- use transparent background
-	-- 			transparent_bg = false, -- default false
-	-- 			-- set custom lualine background color
-	-- 			lualine_bg_color = "#44475a", -- default nil
-	-- 			-- set italic comment
-	-- 			italic_comment = true, -- default false
-	-- 			-- overrides the default highlights with table see `:h synIDattr`
-	-- 			overrides = {},
-	-- 			-- You can use overrides as table like this
-	-- 			-- overrides = {
-	-- 			--   NonText = { fg = "white" }, -- set NonText fg to white
-	-- 			--   NvimTreeIndentMarker = { link = "NonText" }, -- link to NonText highlight
-	-- 			--   Nothing = {} -- clear highlight of Nothing
-	-- 			-- },
-	-- 			-- Or you can also use it like a function to get color from theme
-	-- 			-- overrides = function (colors)
-	-- 			--   return {
-	-- 			--     NonText = { fg = colors.white }, -- set NonText fg to white of theme
-	-- 			--   }
-	-- 			-- end,
-	-- 		})
-	-- 		vim.cmd.colorscheme("dracula")
-	-- 		vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
-	-- 		vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
-	-- 		vim.api.nvim_set_hl(0, "LineNr", { fg = "#7f7f7f" })
-	-- 		vim.cmd.hi("Comment guibg=none ctermbg= None")
-	-- 	end,
-	-- },
-	-- {
-	-- 	"AlexvZyl/nordic.nvim",
-	-- 	lazy = false,
-	-- 	-- priority = 1000,
-	-- 	config = function()
-	-- 		local palette = require("nordic.colors")
-	-- 		require("nordic").load()
-	-- 		require("nordic").setup({
-	-- 			override = {
-	-- 				TelescopePromptTitle = {
-	-- 					fg = palette.red.bright,
-	-- 					bg = palette.green.base,
-	-- 					italic = true,
-	-- 					underline = true,
-	-- 					sp = palette.yellow.dim,
-	-- 					undercurl = false,
-	-- 				},
-	-- 			},
-	-- 		})
-	-- 		vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
-	-- 		vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
-	-- 		vim.api.nvim_set_hl(0, "LineNr", { fg = "#7f7f7f" })
-	-- 		vim.cmd.hi("Comment gui=none")
-	-- 		vim.cmd.hi("Visual guibg=#60728A")
-	-- 	end,
-	-- },
 	{
 		"folke/todo-comments.nvim",
 		event = "VimEnter",
@@ -1470,6 +1367,38 @@ require("lazy").setup({
 			-- See `:help cmp`
 			local cmp = require("cmp")
 			local luasnip = require("luasnip")
+			local function border(hl_name)
+				return {
+					{ "╭", hl_name }, -- 0
+					{ "─", hl_name }, -- 1
+					{ "╮", hl_name }, -- 2
+					{ "│", hl_name }, -- 3
+					{ "╯", hl_name }, -- 4
+					{ "─", hl_name }, -- 5
+					{ "╰", hl_name }, -- 6
+					{ "│", hl_name }, -- 7
+				}
+			end
+			vim.api.nvim_set_hl(0, "CmpItemKindClass", { fg = "#73DACA" })
+			vim.api.nvim_set_hl(0, "CmpItemKindConstructor", { fg = "#73DACA" })
+			vim.api.nvim_set_hl(0, "CmpItemKindFunction", { fg = "#FF8080" })
+			vim.api.nvim_set_hl(0, "CmpItemKindKeyword", { fg = "#FF8080" })
+			vim.api.nvim_set_hl(0, "CmpItemKindMethod", { fg = "#FF8080" })
+			vim.api.nvim_set_hl(0, "CmpItemKindModule", { fg = "#73DACA" })
+			vim.api.nvim_set_hl(0, "CmpItemKindSnippet", { fg = "#FFFFFF" })
+			vim.api.nvim_set_hl(0, "CmpItemKindText", { fg = "#FFFFFF" })
+			vim.api.nvim_set_hl(0, "CmpItemKindVariable", { fg = "#73DACA" })
+			local icon = {
+				Class = " Class",
+				Constructor = " Constructor",
+				Function = "󰡱 Function",
+				Keyword = '" Keyword',
+				Method = "󰢷 Method",
+				Module = " Module",
+				Snippet = " Snippet",
+				Text = "󰊄 Text",
+				Variable = "󰀫 Variable",
+			}
 			luasnip.config.setup({})
 			cmp.setup.cmdline("/", {
 				mapping = cmp.mapping.preset.cmdline(),
@@ -1537,7 +1466,6 @@ require("lazy").setup({
 							luasnip.jump(-1)
 						end
 					end, { "i", "s" }),
-
 					-- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
 					--    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
 				}),
@@ -1545,6 +1473,17 @@ require("lazy").setup({
 					{ name = "nvim_lsp" },
 					{ name = "luasnip" },
 					{ name = "path" },
+				},
+				formatting = {
+					format = function(_, vim_item)
+						vim_item.kind = icon[vim_item.kind] or ""
+						return vim_item
+					end,
+				},
+				window = {
+					documentation = {
+						border = border("CmpDocBorder"),
+					},
 				},
 			})
 		end,
@@ -1578,6 +1517,7 @@ require("lazy").setup({
 			})
 		end,
 	},
+	{ "norcalli/nvim-colorizer.lua" },
 	-- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
 	-- init.lua. If you want these files, they are in the repository, so you can just download them and
 	-- place them in the correct locations.
@@ -1599,11 +1539,10 @@ require("lazy").setup({
 	require("wilsonchen.bookmark"),
 	require("wilsonchen.project"),
 	require("wilsonchen.dashboard"),
-	require("wilsonchen.dashboard"),
 	require("wilsonchen.session"),
 	require("wilsonchen.copilot"),
 	require("wilsonchen.lualine"),
-	--	require("lualine"),
+	require("wilsonchen.colortheme"),
 
 	-- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
 	--    This is the easiest way to modularize your config.
@@ -1632,8 +1571,14 @@ require("lazy").setup({
 		},
 	},
 })
+-- Setting up colortheme.
+vim.cmd.colorscheme("Tokyonight")
+vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
+vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+vim.api.nvim_set_hl(0, "LineNr", { fg = "#7f7f7f" })
+vim.cmd.hi("Comment gui=none")
+vim.cmd.hi("Visual guibg=#60728A")
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
 -- TODO: Git Integration (Need to learn how to pull and solve merge conflict)
 -- TODO: Enhance workflow by making harpoon can stay in session.
--- TODO: Github copoilt? Buy Copilot??? (I think I can do that.)

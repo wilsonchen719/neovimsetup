@@ -79,6 +79,10 @@ return {
 		end
 
 		vim.keymap.set("n", "<S-CR>", function()
+			if vim.g.neovide and _G.isZenMode then
+				vim.g.neovide_padding_left = 0
+				_G.isZenMode = false
+			end
 			vim.api.nvim_feedkeys("vit", "n", false)
 			iron.visual_send()
 			vim.cmd("IronFocus")
@@ -93,6 +97,11 @@ return {
 			if _G.isNvimDapRunning then
 				copy_paste_code_to_repl_line_by_line()
 			else
+				if vim.g.neovide and _G.isZenMode then
+					vim.g.neovide_padding_left = 0
+					_G.isZenMode = false
+				end
+
 				iron.visual_send()
 				vim.cmd("IronFocus")
 				vim.api.nvim_feedkeys("i", "n", false)
