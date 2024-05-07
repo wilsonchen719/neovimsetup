@@ -17,8 +17,7 @@ return {
 		local Path = require("plenary.path")
 		local config = require("session_manager.config")
 		require("session_manager").setup({
-			sessions_dir = Path:new(vim.fn.stdpath("data"), "sessions"), -- The directory where the session files will be saved.
-			-- session_filename_to_dir = session_filename_to_dir, - Function that replaces symbols into separators and colons to transform filename into a session directory.
+			sessions_dir = Path:new(vim.fn.stdpath("data"), "sessions"), -- The directory where the session files will be saved.ir, - Function that replaces symbols into separators and colons to transform filename into a session directory.
 			-- dir_to_session_filename = dir_to_session_filename, -- Function that replaces separators and colons into special symbols to transform session directory into a filename. Should use `vim.loop.cwd()` if the passed `dir` is `nil`.
 			autoload_mode = config.AutoloadMode.Disabled, -- Define what to do when Neovim is started without arguments. Possible values: Disabled, CurrentDir, LastSession
 			autosave_last_session = true, -- Automatically save last session on exit and on session switch.
@@ -34,3 +33,52 @@ return {
 		})
 	end,
 }
+
+-- return {
+-- 	"jedrzejboczar/possession.nvim",
+-- 	config = function()
+-- 		require("possession").setup({
+-- 			commands = {
+-- 				save = "SSave",
+-- 				load = "SLoad",
+-- 				delete = "SDelete",
+-- 				list = "SList",
+-- 			},
+-- 			autosave = {
+-- 				current = true,
+-- 				tmp = true,
+-- 				tmp_name = "tmp",
+-- 				on_load = true,
+-- 				on_quit = true,
+-- 			},
+-- 			plugins = {
+-- 				close_windows = {
+-- 					hooks = { "before_save", "before_load" },
+-- 					preserve_layout = true, -- or fun(win): boolean
+-- 					match = {
+-- 						floating = true,
+-- 						buftype = {},
+-- 						filetype = {},
+-- 						custom = false, -- or fun(win): boolean
+-- 					},
+-- 				},
+-- 				-- delete_hidden_buffers = {
+-- 				-- 	hooks = {
+-- 				-- 		'before_load',
+-- 				-- 		vim.o.sessionoptions:match('buffer') and 'before_save',
+-- 				-- 	},
+-- 				-- 	force = false,  -- or fun(buf): boolean
+-- 				-- },
+-- 				delete_hidden_buffers = false,
+-- 				nvim_tree = true,
+-- 				neo_tree = true,
+-- 				symbols_outline = true,
+-- 				tabby = true,
+-- 				dap = true,
+-- 				dapui = true,
+-- 				neotest = true,
+-- 				delete_buffers = false,
+-- 			},
+-- 		})
+-- 	end,
+-- }
