@@ -115,6 +115,18 @@ vim.keymap.set("n", "\\d", vim.diagnostic.goto_next, { desc = "Go to next [D]iag
 vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Show diagnostic [E]rror messages" })
 vim.keymap.set("n", "Q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
 
+-- Keymaps to jump between buffers.
+vim.keymap.set("n", "<C-PageUp>", function()
+	vim.cmd("bprevious")
+end, { desc = "Go to previous buffer" })
+vim.keymap.set("n", "<C-PageDown>", function()
+	vim.cmd("bnext")
+end, { desc = "Go to next buffer" })
+vim.keymap.set("n", "<leader>a", function()
+	vim.cmd("w")
+	vim.cmd("bd")
+end, { desc = "" })
+
 if vim.g.neovide then
 	vim.keymap.set("n", "<C-z>", function()
 		if _G.isZenMode then
@@ -178,6 +190,7 @@ vim.keymap.set("n", "<C-h>", "<C-w><C-h>", { desc = "Move focus to the left wind
 vim.keymap.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move focus to the right window" })
 vim.keymap.set("n", "<C-j>", "<C-w><C-j>", { desc = "Move focus to the lower window" })
 vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
+-- Oil Remap
 vim.keymap.set("n", "<leader>o", function()
 	-- If we are in Neovide and in my defined zen mode. (Then turn off padding.)
 	if _G.isZenMode and vim.g.neovide then
@@ -187,6 +200,7 @@ vim.keymap.set("n", "<leader>o", function()
 	vim.cmd("vsplit | wincmd l | vertical resize 80")
 	require("oil").open()
 end, { noremap = true, silent = true })
+
 vim.keymap.set("n", "<leader>pv", function()
 	require("oil").open()
 end, { noremap = true, silent = true })
@@ -535,11 +549,11 @@ require("lazy").setup({
 			vim.keymap.set("n", "<leader>sh", builtin.help_tags, { desc = "[S]earch [H]elp" })
 			vim.keymap.set("n", "<leader>sk", builtin.keymaps, { desc = "[S]earch [K]eymaps" })
 			vim.keymap.set("n", "<leader>sf", function()
-				-- require("harpoon"):list():add()
 				builtin.find_files()
 			end, { desc = "[S]earch [F]iles" })
 			--vim.keymap.set("n", "<leader>ss", builtin.builtin, { desc = "[S]earch [S]elect Telescope" })
 			-- vim.keymap.set("n", "<leader>sw", builtin.grep_string, { desc = "[S]earch current [W]ord" })
+			vim.keymap.set("n", "<leader>sb", builtin.buffers, { desc = "[S]earch by [B]uffers" })
 			vim.keymap.set("n", "<leader>sg", builtin.live_grep, { desc = "[S]earch by [G]rep" })
 			vim.keymap.set("n", "<leader>sd", builtin.diagnostics, { desc = "[S]earch [D]iagnostics" })
 			vim.keymap.set("n", "<leader>sr", builtin.resume, { desc = "[S]earch [R]esume" })
@@ -548,10 +562,6 @@ require("lazy").setup({
 				-- require("harpoon"):list():add()
 			end, { desc = "[S]earch [F]iles" })
 			vim.keymap.set("n", "<leader>ss", builtin.lsp_document_symbols, { desc = "[S]earch [S]ymbols" })
-			-- Although not related to telescope, but I put the session manager search here.
-			vim.keymap.set("n", "<leader>sw", function()
-				vim.cmd("SessionManager load_session")
-			end, { desc = "[S]earch [W]orkspace" })
 			-- Slightly advanced example of overriding default behavior and theme
 			vim.keymap.set("n", "<leader>/", function()
 				-- You can pass additional configuration to Telescope to change the theme, layout, etc.
@@ -577,9 +587,13 @@ require("lazy").setup({
 				builtin.find_files({ cwd = vim.fn.stdpath("data") })
 			end, { desc = "[S]earch Neovim pl[u]gins" })
 			vim.keymap.set("n", "<leader>sp", function()
-				vim.cmd("SessionManager load_session")
-				require("harpoon"):setup()
+				vim.cmd("Telescope projects")
 			end, { desc = "[S]earch [P]rojects" })
+			-- Although not related to telescope, but I put the session manager search here.
+			vim.keymap.set("n", "<leader>sw", function()
+				vim.cmd("SessionManager save_current_session")
+				vim.cmd("SessionManager load_session")
+			end, { desc = "[S]earch [W]orkspace" })
 		end,
 	},
 	{
@@ -645,15 +659,18 @@ require("lazy").setup({
 				keymaps = {
 					["g?"] = "actions.show_help",
 					["<CR>"] = "actions.select",
-					["<C-s>"] = "actions.select_vsplit",
-					["<C-h>"] = "actions.select_split",
+					["<C-w>v"] = "actions.select_vsplit", -- No need to set this, it's already set by default.
+					["<C-h>"] = "<C-w><C-h>", --Make the behaviour like other normal buffer.
+					["<C-l>"] = "<C-w><C-l>", --Make the behaviour like other normal buffer.
+					["<C-w>s"] = "actions.select_split",
 					["<C-t>"] = "actions.select_tab",
 					["<C-p>"] = "actions.preview",
 					["<C-c>"] = "actions.close",
-					["<C-l>"] = "actions.refresh",
-					["-"] = "actions.parent",
+					["<C-f>"] = "actions.refresh",
+					["-"] = "<cmd>30winc <<CR>",
+					["^"] = "actions.parent",
 					["_"] = "actions.open_cwd",
-					["`"] = "actions.cd",
+					["|"] = "actions.cd",
 					["~"] = "actions.tcd",
 					["gs"] = "actions.change_sort",
 					["gx"] = "actions.open_external",
@@ -748,61 +765,6 @@ require("lazy").setup({
 				},
 			})
 		end,
-	},
-	{
-		"ThePrimeagen/harpoon",
-		branch = "harpoon2",
-		dependencies = { "nvim-lua/plenary.nvim" },
-		config = function()
-			local harpoon = require("harpoon")
-
-			vim.keymap.set("n", "<C-e>", function()
-				harpoon.ui:toggle_quick_menu(harpoon:list())
-			end, { desc = "Open harpoon window" })
-			vim.keymap.set("n", "<leader>a", function()
-				harpoon:list():add()
-			end)
-			-- vim.keymap.set("n", "<C-h>", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end)
-			vim.keymap.set("n", "<leader>1", function()
-				harpoon:list():select(1)
-			end)
-			vim.keymap.set("n", "<leader>2", function()
-				harpoon:list():select(2)
-			end)
-			vim.keymap.set("n", "<leader>3", function()
-				harpoon:list():select(3)
-			end)
-			-- Toggle previous & next buffers stored within Harpoon list
-			vim.keymap.set("n", "<C-PageUp>", function()
-				harpoon:list():prev()
-			end)
-			vim.keymap.set("n", "<C-PageDown>", function()
-				harpoon:list():next()
-			end)
-			vim.api.nvim_create_autocmd({ "BufLeave", "ExitPre" }, {
-				pattern = "*",
-				callback = function()
-					local filename = vim.fn.expand("%:p:.")
-					local harpoon_marks = harpoon:list().items
-					for _, mark in ipairs(harpoon_marks) do
-						if mark.value == filename then
-							mark.context.row = vim.fn.line(".")
-							mark.context.col = vim.fn.col(".")
-							return
-						end
-					end
-				end,
-			})
-		end,
-	},
-	{
-		"letieu/harpoon-lualine",
-		dependencies = {
-			{
-				"ThePrimeagen/harpoon",
-				branch = "harpoon2",
-			},
-		},
 	},
 	{ -- LSP Configuration & Plugins
 		"neovim/nvim-lspconfig",
@@ -1229,6 +1191,7 @@ require("lazy").setup({
 
 			---@diagnostic disable-next-line: missing-fields
 			require("nvim-treesitter.configs").setup(opts)
+			-- require("nvim-treesitter.context").setup()
 
 			-- There are additional nvim-treesitter modules that you can use to interact
 			-- with nvim-treesitter. You should go explore a few and see what interests you:
@@ -1236,6 +1199,29 @@ require("lazy").setup({
 			--    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
 			--    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
 			--    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
+		end,
+	},
+	{
+		"nvim-treesitter/nvim-treesitter-context",
+		after = "nvim-treesitter",
+		config = function()
+			require("treesitter-context").setup({
+				enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
+				max_lines = 6, -- How many lines the window should span. Values <= 0 mean no limit.
+				min_window_height = 30, -- Minimum editor window height to enable context. Values <= 0 mean no limit.
+				line_numbers = true,
+				multiline_threshold = 2, -- Maximum number of lines to show for a single context
+				trim_scope = "outer", -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
+				mode = "cursor", -- Line used to calculate context. Choices: 'cursor', 'topline'
+				-- Separator between context and content. Should be a single character string, like '-'.
+				-- When separator is set, the context will only show up when there are at least 2 lines above cursorline.
+				separator = nil,
+				zindex = 20, -- The Z-index of the context window
+				on_attach = nil, -- (fun(buf: integer): boolean) return false to disable attaching
+			})
+			vim.keymap.set("n", "[h", function()
+				require("treesitter-context").go_to_context(vim.v.count1)
+			end, { silent = true })
 		end,
 	},
 	{
@@ -1578,6 +1564,7 @@ vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
 vim.api.nvim_set_hl(0, "LineNr", { fg = "#7f7f7f" })
 vim.cmd.hi("Comment gui=none")
 vim.cmd.hi("Visual guibg=#60728A")
+
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
 -- TODO: Git Integration (Need to learn how to pull and solve merge conflict)
