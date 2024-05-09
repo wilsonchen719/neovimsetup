@@ -3,6 +3,7 @@ return {
 	config = function()
 		local iron = require("iron.core")
 		local view = require("iron.view")
+		local dap = require("dap")
 		iron.setup({
 			config = {
 				-- Whether a repl should be discarded or not
@@ -41,41 +42,19 @@ return {
 			ignore_blank_lines = true, -- ignore blank lines when sending visual select lines
 			--Floating Version
 		})
-		local function intToLetter(n)
-			local alphabet = "abcdefghijklmnopqrstuvwxyz"
-			local upperAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-			if n >= 1 and n <= 26 then
-				return alphabet:sub(n, n)
-			elseif n >= 27 and n <= 52 then
-				return upperAlphabet:sub(n - 26, n - 26)
-			else
-				print("Can't do more than 52 lines.")
-			end
-		end
 
 		local function send_code_to_repl()
-			local start_line = vim.fn.getpos("'<")[2]
-			local end_line = vim.fn.getpos("'>")[2]
-			local buffer = vim.api.nvim_get_current_buf()
-
-			vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, true, true), "n", false)
-			vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-w><C-j>", true, true, true), "n", false)
-			vim.api.nvim_feedkeys("i", "n", false)
-			vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<S-CR>", true, true, true), "", false)
-
-			--TODO: I need a more stable soluton than this shit.......
-
+			--Exit visual mode.
+			vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, true, true), "n", true)
+			local start_line = vim.fn.getpos("v")[2]
+			local end_line = vim.fn.getpos(".")[2]
+			--
+			local lines = {}
 			for line_number = start_line, end_line do
-				local line_content = vim.api.nvim_buf_get_lines(buffer, line_number - 1, line_number, false)[1]
-				local register_str = intToLetter(line_number - start_line + 1)
-				vim.api.nvim_call_function("setreg", { register_str, line_content })
-				vim.api.nvim_feedkeys(
-					vim.api.nvim_replace_termcodes("<C-R>" .. register_str, true, true, true),
-					"n",
-					true
-				)
-				vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<CR>", true, true, true), "", false)
+				table.insert(lines, vim.api.nvim_buf_get_lines(0, line_number - 1, line_number, false)[1])
 			end
+			-- dap.repl.open()
+			dap.repl.execute(table.concat(lines, "\n"))
 		end
 
 		vim.keymap.set("n", "<S-CR>", function()

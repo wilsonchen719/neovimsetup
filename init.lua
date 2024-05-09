@@ -221,6 +221,7 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 		vim.highlight.on_yank()
 	end,
 })
+-- Create autocmd to set keymaps for oil://* buffers
 -- Calling black(autoformat) on save.
 vim.api.nvim_create_augroup("AutoFormat", {})
 vim.api.nvim_create_autocmd("BufWritePost", {
@@ -594,6 +595,36 @@ require("lazy").setup({
 				vim.cmd("SessionManager save_current_session")
 				vim.cmd("SessionManager load_session")
 			end, { desc = "[S]earch [W]orkspace" })
+		end,
+	},
+	{
+		"jvgrootveld/telescope-zoxide",
+		config = function()
+			local t = require("telescope")
+			-- local z_utils = require("telescope._extensions.zoxide.utils")
+			t.setup({
+				extensions = {
+					zoxide = {
+						prompt_title = "[ Oil Up! ]",
+						mappings = {
+							default = {
+								after_action = function(selection)
+									-- print(selection.path)
+									vim.cmd("Oil " .. selection.path)
+									vim.api.nvim_feedkeys("_", "", false)
+								end,
+							},
+						},
+					},
+				},
+			})
+			t.load_extension("zoxide")
+			vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
+				pattern = { "oil://*" },
+				callback = function()
+					vim.keymap.set("n", "<leader>z", t.extensions.zoxide.list, { desc = "Jump!", buffer = 0 })
+				end,
+			})
 		end,
 	},
 	{
