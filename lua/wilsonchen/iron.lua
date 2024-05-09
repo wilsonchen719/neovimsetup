@@ -48,6 +48,10 @@ return {
 			vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, true, true), "n", true)
 			local start_line = vim.fn.getpos("v")[2]
 			local end_line = vim.fn.getpos(".")[2]
+			-- In case the user selects from bottom to top.
+			if start_line > end_line then
+				start_line, end_line = end_line, start_line
+			end
 			--
 			local lines = {}
 			for line_number = start_line, end_line do
