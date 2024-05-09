@@ -53,17 +53,17 @@ return {
 			end
 		end
 
-		local function copy_paste_code_to_repl_line_by_line()
+		local function send_code_to_repl()
 			local start_line = vim.fn.getpos("'<")[2]
 			local end_line = vim.fn.getpos("'>")[2]
 			local buffer = vim.api.nvim_get_current_buf()
-			-- print(start_line)
-			-- print(end_line)
-			-- print(end_line - start_line)
+
 			vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, true, true), "n", false)
 			vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-w><C-j>", true, true, true), "n", false)
 			vim.api.nvim_feedkeys("i", "n", false)
 			vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<S-CR>", true, true, true), "", false)
+
+			--TODO: I need a more stable soluton than this shit.......
 
 			for line_number = start_line, end_line do
 				local line_content = vim.api.nvim_buf_get_lines(buffer, line_number - 1, line_number, false)[1]
@@ -95,7 +95,7 @@ return {
 
 		vim.keymap.set("v", "<S-Cr>", function()
 			if _G.isNvimDapRunning then
-				copy_paste_code_to_repl_line_by_line()
+				send_code_to_repl()
 			else
 				if vim.g.neovide and _G.isZenMode then
 					vim.g.neovide_padding_left = 0
