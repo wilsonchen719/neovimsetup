@@ -17,7 +17,7 @@ return {
 		vim.keymap.set("n", "<leader>bs", function()
 			bookmarks.delete_on_virt()
 		end, { desc = "[B]ookmark [S]how" })
-		vim.keymap.set("n", "<leader>sb", function()
+		vim.keymap.set("n", "<leader>sm", function()
 			vim.cmd("Telescope bookmarks")
 		end, { desc = "[S]earch [B]ookmarks" })
 	end,
