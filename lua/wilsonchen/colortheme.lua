@@ -16,7 +16,6 @@ return {
 		no_italic = true,
 		no_bold = true,
 	},
-
 	{
 		"Mofiqul/dracula.nvim",
 		opts = { colorscheme = "dracula" },
@@ -123,5 +122,22 @@ return {
 	},
 	{
 		"https://github.com/catppuccin/nvim",
+	},
+	{
+		"https://github.com/Mofiqul/vscode.nvim",
+	},
+	{
+		"https://github.com/scottmckendry/cyberdream.nvim",
+	},
+	{
+		"https://github.com/ribru17/bamboo.nvim",
+	},
+	{
+		"https://github.com/neanias/everforest-nvim",
+		config = function()
+			require("everforest").setup({
+				background = "medium", -- or "hard", "soft"
+			})
+		end,
 	},
 }

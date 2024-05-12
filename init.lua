@@ -8,8 +8,8 @@ if vim.g.neovide then
 	local alpha = function()
 		return string.format("%x", math.floor((255 * vim.g.transparency) or 0.8))
 	end
-	vim.o.guifont = "FiraCode Nerd Font:h11"
-	vim.g.neovide_transparency = 0.90
+	vim.o.guifont = "Liga SFMono Nerd Font:h12"
+	vim.g.neovide_transparency = 0.95
 	vim.g.transparency = 0.8
 	vim.g.neovide_background_color = "#0f1117" .. alpha()
 	vim.g.neovide_window_blurred = true
@@ -23,6 +23,8 @@ if vim.g.neovide then
 	vim.g.neovide_light_angle_degrees = 45
 	vim.g.neovide_light_radius = 5
 	vim.g.neovide_show_border = true
+	vim.api.nvim_set_keymap("i", "<c-v>", "<c-r>+", { noremap = true })
+	vim.api.nvim_set_keymap("c", "<c-v>", "<c-r>+", { noremap = true })
 end
 
 -- [[ Setting options ]]
@@ -196,9 +198,12 @@ vim.keymap.set("n", "<leader>o", function()
 	if _G.isZenMode and vim.g.neovide then
 		vim.cmd("lua vim.g.neovide_padding_left = 0")
 		_G.isZenMode = false
+		vim.cmd("vsplit | wincmd l | vertical resize 40")
+		require("oil").open()
+	else
+		vim.cmd("vsplit | wincmd l | vertical resize 80")
+		require("oil").open()
 	end
-	vim.cmd("vsplit | wincmd l | vertical resize 80")
-	require("oil").open()
 end, { noremap = true, silent = true })
 
 vim.keymap.set("n", "<leader>pv", function()
@@ -529,12 +534,25 @@ require("lazy").setup({
 				-- You can put your default mappings / updates / etccopeFuzzyCommandSearch) in here
 				--  All the info you're looking for is in `:help telescope.setup()`
 				--
-				-- defaults = {
-				--   mappings = {
-				--     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-				--   },
+				defaults = {
+					-- mappings = {
+					--   i = { ['<c-enter>'] = 'to_fuzzy_refine' },
+					-- },
+					layout_config = {
+						vertical = { width = 0.6 },
+						horizontal = { height = 0.5 },
+						prompt_position = "top",
+					},
+					sorting_strategy = "ascending",
+				},
+				-- pickers = {
+				-- 	{
+				-- 		layout_config = {
+				-- 			prompt_position = "top",
+				-- 		},
+				-- 		sorting_strategy = "ascending",
+				-- 	},
 				-- },
-				-- pickers = {}
 				extensions = {
 					["ui-select"] = {
 						require("telescope.themes").get_dropdown(),
@@ -1047,7 +1065,13 @@ require("lazy").setup({
 		version = "*",
 		config = function()
 			require("toggleterm").setup({
-				size = 80,
+				-- size = function(term)
+				-- 	if term.direction == "horizontal" then
+				-- 		return 15
+				-- 	elseif term.direction == "vertical" then
+				-- 		return vim.o.columns * 0.4
+				-- 	end
+				-- end,
 				-- open_mapping = [[<C-\>]],
 				hide_numbers = true,
 				shade_dfiletypes = {},
@@ -1055,23 +1079,29 @@ require("lazy").setup({
 				start_in_insrt = true,
 				insert_mappings = true,
 				persist_size = true,
-				direction = "vertical",
+				direction = "float",
 				close_on_exit = true,
 				shell = vim.o.shell,
 				float_opts = {
 					border = "curved",
-					winblend = 0,
-					highlights = {
-						border = "Normal",
-						background = "Normal",
-					},
+					winblend = 3,
+					-- row = 3,
+					-- col = 3,
+					width = 100,
+					height = 40,
+					title_opts = "center",
 				},
 			})
 		end,
 		vim.keymap.set("n", "<C-\\>", function()
-			if _G.isZenMode then
-				require("zen-mode").close()
-			end
+			-- if _G.isZenMode and not vim.g.neovide then
+			-- 	vim.cmd("ZenMode")
+			-- end
+			-- if _G.isZenMode and vim.g.neovide then
+			-- 	vim.cmd("lua vim.g.neovide_padding_left = 0")
+			-- 	_G.isZenMode = false
+			-- end
+
 			vim.cmd("ToggleTerm")
 		end),
 	},
@@ -1535,6 +1565,25 @@ require("lazy").setup({
 		end,
 	},
 	{ "norcalli/nvim-colorizer.lua" },
+	{
+		"echasnovski/mini.nvim",
+		config = function()
+			require("mini.move").setup({
+				mappings = {
+					right = "<M-l>",
+					left = "<M-h>",
+					line_up = "<M-k>",
+					line_down = "<M-j>",
+					down = "<M-j>",
+					up = "<M-k>",
+				},
+				options = {
+					--Automatically reindent selection during linewise verical movement
+					reindet_linewise = true,
+				},
+			})
+		end,
+	},
 	-- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
 	-- init.lua. If you want these files, they are in the repository, so you can just download them and
 	-- place them in the correct locations.
@@ -1589,14 +1638,14 @@ require("lazy").setup({
 	},
 })
 -- Setting up colortheme.
-vim.cmd.colorscheme("Tokyonight")
-vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
-vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
-vim.api.nvim_set_hl(0, "LineNr", { fg = "#7f7f7f" })
-vim.cmd.hi("Comment gui=none")
-vim.cmd.hi("Visual guibg=#60728A")
+vim.cmd.colorscheme("everforest")
+-- vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
+-- vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+-- vim.api.nvim_set_hl(0, "LineNr", { fg = "#7f7f7f" })
+-- vim.cmd.hi("Comment gui=none")
+-- vim.cmd.hi("Visual guibg=#60728A")
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
--- TODO: Git Integration (Need to learn how to pull and solve merge conflict)
--- TODO: Enhance workflow by making harpoon can stay in session.
+-- TODO: Git Integartion (learn how to use LazyGit)
+-- TODO: Learn or maybe add pluginMuliteline cursor/edit mode  (maybe add plugin)

@@ -26,7 +26,7 @@ return {
 						["il"] = "@loop.inner",
 						["al"] = "@loop.outer",
 						-- Comment
-						["at"] = "@comment.outer",
+						-- ["at"] = "@comment.outer",
 					},
 				},
 				move = {

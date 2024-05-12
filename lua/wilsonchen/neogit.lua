@@ -14,8 +14,12 @@ return {
 			if vim.g.neovide and _G.isZenMode then
 				vim.cmd("lua vim.g.neovide_padding_left = 0")
 				_G.isZenMode = false
+				vim.cmd("Neogit kind=vsplit")
+				vim.cmd("vertical resize 40")
+			else
+				vim.cmd("Neogit kind=vsplit")
+				vim.cmd("vertical resize 80")
 			end
-			vim.cmd("Neogit kind=vsplit")
 		end, { desc = "[G]it [S]tatus" })
 
 		vim.keymap.set("n", "<leader>gf", function()
