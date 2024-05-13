@@ -8,7 +8,7 @@ if vim.g.neovide then
 	local alpha = function()
 		return string.format("%x", math.floor((255 * vim.g.transparency) or 0.8))
 	end
-	vim.o.guifont = "Liga SFMono Nerd Font:h12"
+	vim.o.guifont = "FiraCode Nerd Font:h11"
 	vim.g.neovide_transparency = 0.95
 	vim.g.transparency = 0.8
 	vim.g.neovide_background_color = "#0f1117" .. alpha()
@@ -40,7 +40,7 @@ vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.colorcolumn = "120"
 vim.opt.textwidth = 120
-vim.opt.wrap = false
+vim.opt.wrap = true
 -- Stop autoindenting next line.
 vim.cmd([[autocmd FileType * set formatoptions-=ro]])
 -- You can also add relative line numbers, to help with jumping.
@@ -1094,14 +1094,6 @@ require("lazy").setup({
 			})
 		end,
 		vim.keymap.set("n", "<C-\\>", function()
-			-- if _G.isZenMode and not vim.g.neovide then
-			-- 	vim.cmd("ZenMode")
-			-- end
-			-- if _G.isZenMode and vim.g.neovide then
-			-- 	vim.cmd("lua vim.g.neovide_padding_left = 0")
-			-- 	_G.isZenMode = false
-			-- end
-
 			vim.cmd("ToggleTerm")
 		end),
 	},
@@ -1638,7 +1630,7 @@ require("lazy").setup({
 	},
 })
 -- Setting up colortheme.
-vim.cmd.colorscheme("everforest")
+vim.cmd.colorscheme("tokyonight-moon")
 -- vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
 -- vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
 -- vim.api.nvim_set_hl(0, "LineNr", { fg = "#7f7f7f" })

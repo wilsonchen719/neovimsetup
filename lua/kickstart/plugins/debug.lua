@@ -127,8 +127,9 @@ return { {
 		}
 		-- Basic debugging keymaps, feel free to change to your liking!
 		vim.keymap.set("n", "<F5>", function()
-			if _G.isZenMode then
-				require("zen-mode").close()
+			if vim.g.neovide and _G.isZenMode then
+				vim.g.neovide_padding_left = 0
+				_G.isZenMode = false
 			end
 
 			dap.continue()
@@ -152,8 +153,8 @@ return { {
 			--    Don't feel like these are good choices.
 			icons = { expanded = "▾", collapsed = "▸", current_frame = "*" },
 			layouts = {
-				{elements = {"scopes","breakpoints","stacks", "watches"}, size = 40, position = "left"},
-				{elements = {"repl"}, size = 0.25, position = "bottom"}
+				{elements = {"scopes","stacks", "breakpoints"}, size = 40, position = "left"}, --  "watches"
+				{elements = {"repl"}, size = 0.30, position = "bottom"}
 			}
 			
 		})
