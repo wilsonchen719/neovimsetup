@@ -8,7 +8,7 @@ if vim.g.neovide then
 	local alpha = function()
 		return string.format("%x", math.floor((255 * vim.g.transparency) or 0.8))
 	end
-	vim.o.guifont = "FiraCode Nerd Font:h11"
+	vim.o.guifont = "FiraCode Nerd Font:h12"
 	vim.g.neovide_transparency = 0.95
 	vim.g.transparency = 0.8
 	vim.g.neovide_background_color = "#0f1117" .. alpha()
@@ -163,7 +163,8 @@ vim.keymap.set("n", "<C-u>", "<C-u>zz")
 vim.keymap.set("n", "<C-d>", "<C-d>zz")
 vim.keymap.set("n", "n", "nzzzv")
 vim.keymap.set("n", "N", "Nzzzv")
-vim.keymap.set("x", "p", '"_dP')
+vim.keymap.set("x", "p", '"_dP') -- Paste without yanking
+
 --Quick Safe
 vim.keymap.set("n", "<leader>q", function()
 	local save_and_quite = function()
@@ -174,6 +175,16 @@ vim.keymap.set("n", "<leader>q", function()
 		vim.cmd("q")
 	end
 end, { desc = "Save and Quit" })
+
+vim.keymap.set("n", "q", function()
+	local save_and_quite = function()
+		vim.cmd("q")
+	end
+	local status, err = pcall(save_and_quite)
+	if not status then
+		print("Must save before quiting")
+	end
+end, { desc = "Quit" })
 
 --local Path = require("plenary.path")
 --local current_directory = Path:new("."):absolute()

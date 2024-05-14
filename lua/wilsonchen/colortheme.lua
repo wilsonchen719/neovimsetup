@@ -140,4 +140,7 @@ return {
 			})
 		end,
 	},
+	{
+		"rose-pine/neovim",
+	},
 }
