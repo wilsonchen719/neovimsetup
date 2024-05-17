@@ -31,7 +31,7 @@ return {
 			})
 			-- Setting up keymaps for Copilot.
 			-- Ghost text keymappings.
-			vim.keymap.set("i", "<C-J>", 'copilot#Accept("\\<CR>")', {
+			vim.keymap.set("i", "<C-j>", 'copilot#Accept("\\<CR>")', {
 				expr = true,
 				silent = true,
 				replace_keycodes = false,
@@ -58,11 +58,6 @@ return {
 				end
 			end)
 			vim.g.copilot_no_tab_map = true
-			-- Write me a function to copy the code block from CopilotChatToggle.
-			-- vim.keymap.set("n", "<leader>cp", function()
-			-- 	require("CopilotChat").copy()
-
-			-- end)
 		end,
 	},
 }

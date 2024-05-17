@@ -3,6 +3,7 @@ _G.isNvimDapRunning = false
 _G.zenModeWidth = 450
 vim.g.mapleader = " "
 vim.g.have_nerd_font = true
+vim.g.conform_black_linelength = 120
 
 if vim.g.neovide then
 	local alpha = function()
@@ -238,16 +239,6 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 	end,
 })
 -- Create autocmd to set keymaps for oil://* buffers
--- Calling black(autoformat) on save.
-vim.api.nvim_create_augroup("AutoFormat", {})
-vim.api.nvim_create_autocmd("BufWritePost", {
-	pattern = "*.py",
-	group = "AutoFormat",
-	callback = function()
-		vim.cmd("silent !black --quiet --line-length 120%")
-		vim.cmd("edit")
-	end,
-})
 
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
@@ -651,7 +642,7 @@ require("lazy").setup({
 			vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
 				pattern = { "oil://*" },
 				callback = function()
-					vim.keymap.set("n", "<leader>z", t.extensions.zoxide.list, { desc = "Jump!", buffer = 0 })
+					vim.keymap.set("n", "<C-z>", t.extensions.zoxide.list, { desc = "Jump!", buffer = 0 })
 				end,
 			})
 		end,
@@ -1056,12 +1047,14 @@ require("lazy").setup({
 				-- languages here or re-enable it for the disabled ones.
 				local disable_filetypes = { c = true, cpp = true }
 				return {
-					timeout_ms = 500,
+					timeout_ms = 1000,
 					lsp_fallback = not disable_filetypes[vim.bo[bufnr].filetype],
 				}
 			end,
 			formatters_by_ft = {
 				lua = { "stylua" },
+				python = { "black" },
+				go = { "gofumpt", "goimports", "golines" },
 				-- Conform can also run multiple formatters sequentially
 				-- python = { "isort", "black" },
 				--
@@ -1608,10 +1601,10 @@ require("lazy").setup({
 	require("wilsonchen.bookmark"),
 	require("wilsonchen.project"),
 	require("wilsonchen.dashboard"),
+	require("wilsonchen.colortheme"),
 	require("wilsonchen.session"),
 	require("wilsonchen.copilot"),
 	require("wilsonchen.lualine"),
-	require("wilsonchen.colortheme"),
 
 	-- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
 	--    This is the easiest way to modularize your config.
@@ -1641,7 +1634,8 @@ require("lazy").setup({
 	},
 })
 -- Setting up colortheme.
-vim.cmd.colorscheme("tokyonight-moon")
+vim.cmd.colorscheme("catppuccin-macchiato")
+-- vim.cmd.colorscheme("tokyonight-night")
 -- vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
 -- vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
 -- vim.api.nvim_set_hl(0, "LineNr", { fg = "#7f7f7f" })

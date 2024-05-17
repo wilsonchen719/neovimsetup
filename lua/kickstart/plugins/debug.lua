@@ -153,8 +153,8 @@ return { {
 			--    Don't feel like these are good choices.
 			icons = { expanded = "▾", collapsed = "▸", current_frame = "*" },
 			layouts = {
-				{elements = {"scopes","stacks", "breakpoints"}, size = 20, position = "left"}, --  "watches"
-				{elements = {"repl"}, size = 0.30, position = "bottom"}
+				{elements = {"scopes","stacks", "breakpoints"}, size = 30, position = "left"}, --  "watches"
+				{elements = {"repl"}, size = 0.25, position = "bottom"}
 			}
 			
 		})
