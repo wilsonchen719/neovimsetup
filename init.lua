@@ -3,7 +3,7 @@ _G.isNvimDapRunning = false
 _G.zenModeWidth = 450
 vim.g.mapleader = " "
 vim.g.have_nerd_font = true
-vim.g.conform_black_linelength = 120
+vim.g.conform_black_options = "--line-length 120"
 
 if vim.g.neovide then
 	local alpha = function()
@@ -1039,31 +1039,41 @@ require("lazy").setup({
 				desc = "[F]ormat buffer",
 			},
 		},
-		opts = {
-			notify_on_error = false,
-			format_on_save = function(bufnr)
-				-- Disable "format_on_save lsp_fallback" for languages that don't
-				-- have a well standardized coding style. You can add additional
-				-- languages here or re-enable it for the disabled ones.
-				local disable_filetypes = { c = true, cpp = true }
-				return {
-					timeout_ms = 1000,
-					lsp_fallback = not disable_filetypes[vim.bo[bufnr].filetype],
-				}
-			end,
-			formatters_by_ft = {
-				lua = { "stylua" },
-				python = { "black" },
-				go = { "gofumpt", "goimports", "golines" },
-				-- Conform can also run multiple formatters sequentially
-				-- python = { "isort", "black" },
-				--
-				-- You can use a sub-list to tell conform to run *until* a formatter
-				-- is found.
-				-- javascript = { { "prettierd", "prettier" } },
-			},
-		},
-	},
+		config = function()
+      local opts = {
+        notify_on_error = false,
+        format_on_save = function(bufnr)
+          -- Disable "format_on_save lsp_fallback" for languages that don't
+          -- have a well standardized coding style. You can add additional
+          -- languages here or re-enable it for the disabled ones.
+          local disable_filetypes = { c = true, cpp = true }
+          return {
+            timeout_ms = 1000,
+            lsp_fallback = not disable_filetypes[vim.bo[bufnr].filetype],
+          }
+        end,
+        formatters_by_ft = {
+          lua = { "stylua" },
+          python = { "black" },
+          go = { "gofumpt", "goimports", "golines" },
+          -- Conform can also run multiple formatters sequentially
+          -- python = { "isort", "black" },
+          --
+          -- You can use a sub-list to tell conform to run *until* a formatter
+          -- is found.
+          -- javascript = { { "prettierd", "prettier" } },
+        },
+      }
+      require("conform").setup(opts)
+      local black_formatter = vim.deepcopy(require("conform.formatters.black"))
+      require("conform.util").add_formatter_args(black_formatter, {
+        "--line-length",
+        "120",
+      }, { append = false })
+      ---@cast black_formatter conform.FormatterConfigOverride
+      require("conform").formatters.black = black_formatter
+    end
+  },
 	{
 		"akinsho/toggleterm.nvim",
 		version = "*",
@@ -1073,6 +1083,10 @@ require("lazy").setup({
 				-- 	if term.direction == "horizontal" then
 				-- 		return 15
 				-- 	elseif term.direction == "vertical" then
+				-- 		return vim.o.columns * 0.4
+				-- 	end
+				-- end,
+				-- open_mapping = [[<C-\>]],
 				-- 		return vim.o.columns * 0.4
 				-- 	end
 				-- end,
@@ -1593,11 +1607,6 @@ require("lazy").setup({
 	-- require 'kickstart.plugins.indent_line',
 	require("kickstart.plugins.lint"),
 	require("wilsonchen.textobject"),
-	require("wilsonchen.undo"),
-	require("wilsonchen.tablemode"),
-	require("wilsonchen.iron"),
-	require("wilsonchen.rainbowpairs"),
-	require("wilsonchen.neogit"),
 	require("wilsonchen.bookmark"),
 	require("wilsonchen.project"),
 	require("wilsonchen.dashboard"),
