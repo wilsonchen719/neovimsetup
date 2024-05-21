@@ -1040,40 +1040,40 @@ require("lazy").setup({
 			},
 		},
 		config = function()
-      local opts = {
-        notify_on_error = false,
-        format_on_save = function(bufnr)
-          -- Disable "format_on_save lsp_fallback" for languages that don't
-          -- have a well standardized coding style. You can add additional
-          -- languages here or re-enable it for the disabled ones.
-          local disable_filetypes = { c = true, cpp = true }
-          return {
-            timeout_ms = 1000,
-            lsp_fallback = not disable_filetypes[vim.bo[bufnr].filetype],
-          }
-        end,
-        formatters_by_ft = {
-          lua = { "stylua" },
-          python = { "black" },
-          go = { "gofumpt", "goimports", "golines" },
-          -- Conform can also run multiple formatters sequentially
-          -- python = { "isort", "black" },
-          --
-          -- You can use a sub-list to tell conform to run *until* a formatter
-          -- is found.
-          -- javascript = { { "prettierd", "prettier" } },
-        },
-      }
-      require("conform").setup(opts)
-      local black_formatter = vim.deepcopy(require("conform.formatters.black"))
-      require("conform.util").add_formatter_args(black_formatter, {
-        "--line-length",
-        "120",
-      }, { append = false })
-      ---@cast black_formatter conform.FormatterConfigOverride
-      require("conform").formatters.black = black_formatter
-    end
-  },
+			local opts =
+				{
+					notify_on_error = false,
+					format_on_save = function(bufnr)
+						-- Disable "format_on_save lsp_fallback" for languages that don't
+						-- have a well standardized coding style. You can add additional
+						-- languages here or re-enable it for the disabled ones.
+						local disable_filetypes = { c = true, cpp = true }
+						return {
+							timeout_ms = 1000,
+							lsp_fallback = not disable_filetypes[vim.bo[bufnr].filetype],
+						}
+					end,
+					formatters_by_ft = {
+						lua = { "stylua" },
+						python = { "black" },
+						go = { "gofumpt", "goimports", "golines" },
+						-- Conform can also run multiple formatters sequentially
+						-- python = { "isort", "black" },
+						--
+						-- You can use a sub-list to tell conform to run *until* a formatter
+						-- is found.
+						-- javascript = { { "prettierd", "prettier" } },
+					},
+				}, require("conform").setup(opts)
+			local black_formatter = vim.deepcopy(require("conform.formatters.black"))
+			require("conform.util").add_formatter_args(black_formatter, {
+				"--line-length",
+				"120",
+			}, { append = false })
+			---@cast black_formatter conform.FormatterConfigOverride
+			require("conform").formatters.black = black_formatter
+		end,
+	},
 	{
 		"akinsho/toggleterm.nvim",
 		version = "*",
@@ -1611,9 +1611,15 @@ require("lazy").setup({
 	require("wilsonchen.project"),
 	require("wilsonchen.dashboard"),
 	require("wilsonchen.colortheme"),
+	require("wilsonchen.undo"),
+	require("wilsonchen.tablemode"),
+	require("wilsonchen.iron"),
+	require("wilsonchen.rainbowpairs"),
+	require("wilsonchen.neogit"),
 	require("wilsonchen.session"),
 	require("wilsonchen.copilot"),
 	require("wilsonchen.lualine"),
+	require("wilsonchen.undo"),
 
 	-- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
 	--    This is the easiest way to modularize your config.
