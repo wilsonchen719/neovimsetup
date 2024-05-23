@@ -1064,7 +1064,8 @@ require("lazy").setup({
 						-- is found.
 						-- javascript = { { "prettierd", "prettier" } },
 					},
-				}, require("conform").setup(opts)
+				}
+      require("conform").setup(opts)
 			local black_formatter = vim.deepcopy(require("conform.formatters.black"))
 			require("conform.util").add_formatter_args(black_formatter, {
 				"--line-length",
