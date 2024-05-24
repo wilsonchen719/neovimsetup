@@ -130,8 +130,7 @@ vim.keymap.set("n", "<leader>a", function()
 	vim.cmd("bd")
 end, { desc = "" })
 
--- Keymaps to leave insert mode fast
-vim.keymap.set("i", "jk", "<ESC>", { noremap = true })
+-- Keymaps
 
 if vim.g.neovide then
 	vim.keymap.set("n", "<C-z>", function()
