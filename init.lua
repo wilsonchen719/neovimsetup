@@ -153,6 +153,9 @@ vim.keymap.set("t", "<ESC>", function()
 	vim.cmd('call feedkeys("\\<Esc>", "n")')
 	vim.cmd("wincmd h")
 end)
+-- Easiest Way to Escape Insert Mode.
+-- Use jk to escape insert mode
+vim.keymap.set("i", "jk", "<ESC>", { noremap = true, silent = true })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -426,10 +429,10 @@ require("lazy").setup({
 	--    require('Comment').setup({})
 
 	-- "gc" to comment visual regions/lines
-	{
-		"numToStr/Comment.nvim",
-		opts = {},
-	},
+	-- {
+	-- 	"numToStr/Comment.nvim",
+	-- 	opts = {},
+	-- },
 
 	-- Here is a more advanced example where we pass configuration
 	-- options to `gitsigns.nvim`. This is equivalent to the following Lua:
@@ -534,6 +537,7 @@ require("lazy").setup({
 
 			-- [[ Configure Telescope ]]
 			-- See `:help telescope` and `:help telescope.setup()`
+
 			require("telescope").setup({
 				-- You can put your default mappings / updates / etccopeFuzzyCommandSearch) in here
 				--  All the info you're looking for is in `:help telescope.setup()`
@@ -917,7 +921,6 @@ require("lazy").setup({
 					-- Opens a popup that displays documentation about the word under your cursor
 					--  See `:help K` for why this keymap.
 					map("<leader>gh", vim.lsp.buf.hover, "Hover Documentation")
-
 					-- WARN: This is not Goto Definition, this is Goto Declaration.
 					--  For example, in C this would take you to the header.
 					map("gD", vim.lsp.buf.declaration, "[G]oto [D]eclaration")
@@ -981,6 +984,7 @@ require("lazy").setup({
 							completion = {
 								callSnippet = "Replace",
 							},
+							hint = { enable = true },
 							-- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
 							-- diagnostics = { disable = { 'missing-fields' } },
 						},
@@ -990,6 +994,7 @@ require("lazy").setup({
 					settings = {
 						python = {
 							analysis = { typeCheckingMode = "Basic" },
+							hint = { enable = true },
 						},
 					},
 				},
@@ -1023,6 +1028,9 @@ require("lazy").setup({
 					end,
 				},
 			})
+			vim.keymap.set("n", "<leader>h", function()
+				vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ 0 }), { 0 })
+			end, { desc = "Toggle inlay hints" })
 		end,
 	},
 	{
