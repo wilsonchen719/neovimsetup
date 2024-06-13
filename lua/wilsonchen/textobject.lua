@@ -25,6 +25,8 @@ return {
 						-- Loop
 						["il"] = "@loop.inner",
 						["al"] = "@loop.outer",
+						["=l"] = "@assignment.lhs",
+						["=r"] = "@assignment.rhs",
 						-- Comment
 						-- ["at"] = "@comment.outer",
 					},

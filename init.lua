@@ -10,6 +10,7 @@ if vim.g.neovide then
 		return string.format("%x", math.floor((255 * vim.g.transparency) or 0.8))
 	end
 	vim.o.guifont = "FiraCode Nerd Font:h12"
+	-- vim.o.guifont = "JetBrainsMonoNL Nerd Font:h12"
 	vim.g.neovide_transparency = 0.95
 	vim.g.transparency = 0.8
 	vim.g.neovide_background_color = "#0f1117" .. alpha()
@@ -41,7 +42,8 @@ vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.colorcolumn = "120"
 vim.opt.textwidth = 120
-vim.opt.wrap = true
+vim.opt.wrap = false
+vim.opt.conceallevel = 2
 -- Stop autoindenting next line.
 vim.cmd([[autocmd FileType * set formatoptions-=ro]])
 -- You can also add relative line numbers, to help with jumping.
@@ -148,21 +150,23 @@ end
 -- vim.keymap.set("n", "<C-z>", "<cmd>ZenMode<CR>")
 
 -- Easiest Way to Escape Command Mode.
-vim.keymap.set("t", "<ESC>", function()
-	vim.cmd('call feedkeys("\\<Esc>", "n")')
-	vim.cmd('call feedkeys("\\<Esc>", "n")')
-	vim.cmd("wincmd h")
-end)
+-- vim.keymap.set("t", "<ESC>", function()
+-- 	vim.cmd('call feedkeys("\\<Esc>", "n")')
+-- 	vim.cmd('call feedkeys("\\<Esc>", "n")')
+-- 	vim.cmd("wincmd h")
+-- end)
+
 -- Easiest Way to Escape Insert Mode.
 -- Use jk to escape insert mode
 vim.keymap.set("i", "jk", "<ESC>", { noremap = true, silent = true })
-
+-- NOTE: This won't work in all terminal emulators/tmux/etc. Try your own mapping
+-- or just use <C-\><C-n> to exit terminal mode
+vim.keymap.set("t", "jk", "<C-\\><C-n>", { noremap = true, silent = true })
+vim.keymap.set("t", "<ESC>", "<C-\\><C-n>", { noremap = true, silent = true })
+-- vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
 -- is not what someone will guess without a bit more experience.
--- NOTE: This won't work in all terminal emulators/tmux/etc. Try your own mapping
--- or just use <C-\><C-n> to exit terminal mode
-vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 
 --File Navigation Modification, center
 vim.keymap.set("n", "<C-u>", "<C-u>zz")
@@ -191,6 +195,8 @@ vim.keymap.set("n", "q", function()
 		print("Must save before quiting")
 	end
 end, { desc = "Quit" })
+-- Remap the keymap for recording macros
+vim.api.nvim_set_keymap("n", "<leader>rr", "q", { noremap = true })
 
 --local Path = require("plenary.path")
 --local current_directory = Path:new("."):absolute()
@@ -209,6 +215,7 @@ vim.keymap.set("n", "<C-h>", "<C-w><C-h>", { desc = "Move focus to the left wind
 vim.keymap.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move focus to the right window" })
 vim.keymap.set("n", "<C-j>", "<C-w><C-j>", { desc = "Move focus to the lower window" })
 vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
+
 -- Oil Remap
 vim.keymap.set("n", "<leader>o", function()
 	-- If we are in Neovide and in my defined zen mode. (Then turn off padding.)
@@ -409,15 +416,45 @@ require("lazy").setup({
 		end,
 	},
 	{
-		"smoka7/hop.nvim",
-		version = "*",
-		opt = {},
-		config = function()
-			require("hop").setup({})
-			vim.keymap.set("n", "<leader><leader>", function()
-				vim.cmd("HopChar1")
-			end, { desc = "Hop" })
-		end,
+		"folke/flash.nvim",
+		event = "VeryLazy",
+		--@type FlashConfig
+		opts = {},
+		keys = {
+			{
+				"s",
+				mode = { "n" },
+				function()
+					require("flash").jump()
+				end,
+				desc = "Flash",
+			},
+			{
+				"S",
+				mode = { "n" },
+				function()
+					require("flash").treesitter()
+				end,
+				desc = "Flash Treesitter",
+			},
+			{
+				"r",
+				mode = "o",
+				function()
+					require("flash").remote()
+				end,
+				desc = "Remote Flash",
+			},
+			-- {
+			-- 	"c-r",
+			-- 	mode = { "o", "x" },
+			-- 	function()
+			-- 		require("flash").treesitter_search()
+			-- 	end,
+			-- 	desc = "Treesitter Search",
+			-- },
+			-- { "<c-s>", mode = { "c" }, function() require("flash").toggle() end, desc = "Toggle Flash Search" },
+		},
 	},
 	-- NOTE: Plugins can also be added by using a table,
 	-- with the first argument being the link and the following
@@ -990,14 +1027,22 @@ require("lazy").setup({
 						},
 					},
 				},
-				pyright = {
+				basedpyright = {
+					enabled = true,
 					settings = {
-						python = {
-							analysis = { typeCheckingMode = "Basic" },
-							hint = { enable = true },
+						basedpyright = {
+							typeCheckingMode = "basic",
 						},
 					},
 				},
+				-- pyright = {
+				-- 	settings = {
+				-- 		python = {
+				-- 			analysis = { typeCheckingMode = "off" },
+				-- 			hint = { enable = true },
+				-- 		},
+				-- 	},
+				-- },
 			}
 
 			-- Ensure the servers and tools above are installed
@@ -1011,6 +1056,7 @@ require("lazy").setup({
 			-- You can add other tools here that you want Mason to install
 			-- for you, so that they are available from within Neovim.
 			local ensure_installed = vim.tbl_keys(servers or {})
+
 			vim.list_extend(ensure_installed, {
 				"stylua", -- Used to format Lua code
 			})
@@ -1028,11 +1074,23 @@ require("lazy").setup({
 					end,
 				},
 			})
+
 			vim.keymap.set("n", "<leader>h", function()
 				vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ 0 }), { 0 })
 			end, { desc = "Toggle inlay hints" })
 		end,
 	},
+	-- {
+	-- 	"nvimtools/none-ls.nvim",
+	-- 	config = function()
+	-- 		local nullls = require("null-ls")
+	-- 		nullls.setup({
+	-- 			sources = {
+	-- 				nullls.builtins.diagnostics.flake8,
+	-- 			},
+	-- 		})
+	-- 	end,
+	-- },
 	{
 		"ofirgall/goto-breakpoints.nvim",
 	},
@@ -1107,18 +1165,19 @@ require("lazy").setup({
 				start_in_insrt = true,
 				insert_mappings = true,
 				persist_size = true,
-				direction = "float",
+				direction = "horizontal",
+				size = 20,
 				close_on_exit = true,
 				shell = vim.o.shell,
-				float_opts = {
-					border = "curved",
-					winblend = 3,
-					-- row = 3,
-					-- col = 3,
-					width = 100,
-					height = 40,
-					title_opts = "center",
-				},
+				-- float_opts = {
+				-- 	border = "curved",
+				-- 	winblend = 3,
+				-- 	-- row = 3,
+				-- 	-- col = 3,
+				-- 	width = 100,
+				-- 	height = 40,
+				-- 	title_opts = "center",
+				-- },
 			})
 		end,
 		vim.keymap.set("n", "<C-\\>", function()
@@ -1394,11 +1453,11 @@ require("lazy").setup({
 							require("luasnip.loaders.from_vscode").lazy_load()
 							require("luasnip").add_snippets("python", {
 								s("cell", {
-									t({ "#%% #CELL:" }),
+									t({ "#CELL:" }),
 									i(1, "Name Your Cell Here"),
-									t({ "<cell>", "" }),
-									i(2, "Enter Your Code"),
-									t({ "", "#</cell>" }),
+									t({ "<CELL>", "" }),
+									i(2, ""),
+									t({ "", "#</CELL>" }),
 								}),
 								s("visi", {
 									t({ "from visidata import vd" }),
@@ -1630,6 +1689,9 @@ require("lazy").setup({
 	require("wilsonchen.copilot"),
 	require("wilsonchen.lualine"),
 	require("wilsonchen.undo"),
+	require("wilsonchen.outline"),
+	require("wilsonchen.obsidian"),
+	require("wilsonchen.latex"),
 
 	-- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
 	--    This is the easiest way to modularize your config.
