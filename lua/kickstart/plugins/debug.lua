@@ -197,7 +197,7 @@ return { {
 		config = function()
 			vim.keymap.set("v", "<leader>vp",
 				function()require("visidata").visualize_pandas_df()end, { desc = "[V]isualize [P]andas" })
-		end,		
+		end,
 	},
 	{
 		"rcarriga/cmp-dap",

@@ -41,7 +41,7 @@ vim.opt.shiftwidth = 4 -- Number of spaces inserted when indenting-- Make line n
 vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.colorcolumn = "120"
-vim.opt.textwidth = 120
+vim.opt.textwidth = 0
 vim.opt.wrap = false
 vim.opt.conceallevel = 2
 -- Stop autoindenting next line.
@@ -180,7 +180,7 @@ vim.keymap.set("n", "<leader>q", function()
 	local save_and_quite = function()
 		vim.cmd("wq")
 	end
-	local status, err = pcall(save_and_quite)
+	local status, _ = pcall(save_and_quite)
 	if not status then
 		vim.cmd("q")
 	end
@@ -190,7 +190,7 @@ vim.keymap.set("n", "q", function()
 	local save_and_quite = function()
 		vim.cmd("q")
 	end
-	local status, err = pcall(save_and_quite)
+	local status, _ = pcall(save_and_quite)
 	if not status then
 		print("Must save before quiting")
 	end
@@ -349,6 +349,7 @@ require("lazy").setup({
 					font = "+4", -- font size increment
 				},
 				-- this will change the font size on alacritty when in zen mode
+        -- asdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdffasdfasdfasdfas
 				-- requires  Alacritty Version 0.10.0 or higher
 				-- uses `alacritty msg` subcommand to change font size
 				alacritty = {
@@ -925,6 +926,7 @@ require("lazy").setup({
 
 					-- Find references for the word under your cursor.
 					map("gr", require("telescope.builtin").lsp_references, "[G]oto [R]eferences")
+          map("<leader>gr", vim.lsp.buf.references, "[G]oto [R]eferences")
 
 					-- Jump to the implementation of the word under your cursor.
 					--  Useful when your language has ways of declaring types without an actual implementation.
@@ -979,6 +981,26 @@ require("lazy").setup({
 							callback = vim.lsp.buf.clear_references,
 						})
 					end
+
+          -- Can't make below code works....
+          -- local bufnr = event.buf
+          -- if vim.tbl_contains({"null-ls"}, client.name) then
+          --   return
+          -- end
+          -- require("lsp_signature").on_attach({
+          --   bind = true,
+          --   doc_lines = 2,
+          --   floating_window = true,
+          --   hint_enable = true,
+          --   hint_prefix = " ",
+          --   hint_scheme = "String",
+          --   use_lspsaga = false,
+          --   handler_opts = {
+          --     border = "single"
+          --   },
+          --   decorator = {"`", "`"}
+          -- }, bufnr)
+          --
 				end,
 			})
 
@@ -1032,6 +1054,7 @@ require("lazy").setup({
 					settings = {
 						basedpyright = {
 							typeCheckingMode = "basic",
+              reportUnsupportedStringEscape = "off",
 						},
 					},
 				},
@@ -1469,6 +1492,23 @@ require("lazy").setup({
 									i(1, "Df"),
 									t(")"),
 								}),
+                s("col", {
+                  t({"print("}),
+                  i(1, "df_name"),
+                  t({".columns)"}),
+                }),
+                s("dtype", {
+                  t({"print("}),
+                  i(1, "df_name"),
+                  t({".dtypes)"}),
+                }),
+                s("head", {
+                  t({"print("}),
+                  i(1, "df_name"),
+                  t({".head("}),
+                  i(2, "row number"),
+                  t({"))"}),
+                }),
 							})
 							require("luasnip").add_snippets("lua", {
 								s("config", {
@@ -1614,6 +1654,47 @@ require("lazy").setup({
 			})
 		end,
 	},
+  -- Couldn't get this working as well....
+  {
+    "ray-x/lsp_signature.nvim",
+    opts = {},
+    config = function()
+      local cfg = {
+          bind = true,
+          doc_lines = 2,
+          floating_window = true,
+          hint_enable = true,
+          hint_prefix = " ",
+          hint_scheme = "String",
+          use_lspsaga = false,
+          handler_opts = { border = "single" },
+          decorator = {"`", "`"}
+      }
+      require("lsp_signature").on_attach(cfg)
+    end,
+    --   vim.api.nvim_create_autocmd("LspAttach", {
+    --     callback = function(args)
+    --       local bufnr = args.buf
+    --       local client = vim.lsp.get_client_by_id(args.client_id)
+    --       if vim.tbl_contains({"null-ls"}, client.name) then -- blacklist lsp
+    --         return
+    --       end
+    --       require("lsp_signature").on_attach({
+    --         bind = true,
+    --         handler_opts = {
+    --           border = "rounded",
+    --         },
+    --         hint_enable = true,
+    --         hint_prefix = " ",
+    --         hint_scheme = "String",
+    --         use_lspsaga = false,
+    --         z_index = 50,
+    --       }, bufnr)
+    --     end
+    --   })
+    -- end
+
+  },
 	{ "kmontocam/nvim-conda" },
 	-- "ubaldot/vim-conda-activate",
 	{
@@ -1721,6 +1802,7 @@ require("lazy").setup({
 	},
 })
 -- Setting up colortheme.
+-- vim.cmd.colorscheme("vscode")
 vim.cmd.colorscheme("catppuccin-macchiato")
 -- vim.cmd.colorscheme("tokyonight-night")
 -- vim.api.nvim_set_hl(0, "Normal", { bg = "none" })

@@ -29,5 +29,9 @@ return {
 			end
 			vim.cmd("DiffviewOpen")
 		end, { desc = "[G]it Dif[f]" })
+
+		-- vim.keymap.set("n", "gh", function() vim.cmd("diffget //2") end,{Desc=  "Diff Get 2" })
+		-- vim.keymap.set("n", "gl", function() vim.cmd("diffget //3") end,{Desc=  "Diff Get 3" })
+
 	end,
 }
