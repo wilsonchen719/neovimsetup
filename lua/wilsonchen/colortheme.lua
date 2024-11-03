@@ -146,4 +146,13 @@ return {
 	{
 		"anfigeno/mestizo.nvim",
 	},
+	{
+		"vague2k/vague.nvim",
+		config = function()
+		require("vague").setup({
+		  -- optional configuration here
+		})
+		end
+	},
+	{ "projekt0n/github-nvim-theme" }
 }

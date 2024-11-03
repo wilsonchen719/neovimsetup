@@ -26,10 +26,11 @@ return {
 			-- split_command = "30vsplit",
 			symbols = {
 				filter = {
-					default = { "String", exclude = true },
-					python = { "Function", "Class", "Method", "Attribute" },
+					-- default = { "String", exclude = true },
+					python = { "Function", "Class", "Method",  "Constant",  },
 				},
 			},
 		})
 	end,
 }
+-- require("outline").setup({width=25,relative_width=true,show_numbers=true,show_relative_numbers=true,split_command="30vsplit",symbols={filter={default={"String",exclude=true},python={"Function","Class","Method","Constant",},},},})

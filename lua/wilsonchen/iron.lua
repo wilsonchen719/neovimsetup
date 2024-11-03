@@ -10,6 +10,12 @@ return {
 				scratch_repl = true,
 				-- Your repl definitions come here
 				repl_definition = {
+					-- python = { command = function()
+					-- 	local str = vim.fn.input("Command")
+					-- 	return {"ipython", "--no-autoindent", str}
+					-- end,
+					-- format = require("iron.fts.common").bracketed_paste_python
+					-- }
 					sh = {
 						-- kcanbe a table or a function that returns a table.
 						command = { "zsh" },
