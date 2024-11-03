@@ -96,10 +96,22 @@ return { {
 				-- The first three options are required by nvim-dap
 				type = "python", -- the type here established the link to the adapter definition: `dap.adapters.python`
 				request = "launch",
+				JustMyCode = false,
 				name = "Launch file in externalTerminal",
-
 				-- Options below are for debugpy, see https://github.com/microsoft/debugpy/wiki/Debug-configuration-settings for supported options
 				program = "${file}", -- This configuration will launch the current file if used.
+				args = function()
+					local str = vim.fn.input("Cache Mode")
+					if str == "" or str == "None" then
+						return nil
+					end
+
+					if str == "enable" or str == "clear" then
+						return {"--cache", str}
+					end
+
+					return {}
+				end,
 				console = "externalTerminal",
 				command = "C:/Users/wilsonchen/AppData/Local/Microsoft/WindowsApps/wt.exe",
 				pythonPath = function()
@@ -120,26 +132,124 @@ return { {
 				repl_lang = "python",
 			},
 		}
+
 		dap.defaults.fallback.force_external_terminal = true
 		dap.defaults.fallback.external_terminal = {
 			command ="C:/Users/wilsonchen/AppData/Local/Microsoft/WindowsApps/wt.exe";
 			arg= {};
 		}
 		-- Basic debugging keymaps, feel free to change to your liking!
+		vim.keymap.set("n", "<C-F5>", function()
+			local opt_config = vim.fn.input("Change dap configure (S for Streamlit)")
+			if opt_config == "S" or opt_config == "s" then
+				dap.configurations.python = {
+						{
+							type = "python",
+							request = "launch",
+							name = "StreamlitApp",
+							module = "streamlit",
+							args = function()
+								local str = vim.fn.input("Cache Mode: ")
+								if str == "" or str == "None" then
+									return {"run", "${file}", "--server.port", "2000", "--", "--cache", "enable"}
+								end
+
+								if str == "enable" or str == "clear" then
+									return {"run", "${file}", "--server.port", "2000", "--", "--cache", str}
+								end
+
+								return {"run", "${file}", "--server.port", "2000", "--", "--cache", "enable"}
+							end,
+							console = "externalTerminal",
+							repl_lang = "python",
+							command = "C:/Users/wilsonchen/AppData/Local/Microsoft/WindowsApps/wt.exe",
+							pythonPath = function()
+							-- debugpy supports launching an application with a different interpreter then the one used to launch debugpy itself.
+							-- The code below looks for a `venv` or `.venv` folder in the current directly and uses the python within.
+							-- You could adapt this - to for example use the `VIRTUAL_ENV` environment variable.
+								local cwd = vim.fn.getcwd()
+								if vim.fn.executable(cwd .. "/venv/Scripts/pythonw.exe") == 1 then
+									return pythonpath
+								elseif vim.fn.executable(cwd .. "/.venv/Scripts/pythonw.exe") == 1 then
+									return pythonpath
+								else
+									-- Please modify your code here to auto-select initial program
+									local current_env_python = os.getenv('CONDA_DEFAULT_ENV')
+									return "C:\\Users\\wilsonchen\\AppData\\Local\\anaconda3\\envs\\" .. current_env_python .. "\\python.exe"
+								end
+							end,
+						}
+				}
+				print("DAP: Streamlit App")
+			else
+				dap.configurations.python = {
+					{
+						-- The first three options are required by nvim-dap
+						type = "python", -- the type here established the link to the adapter definition: `dap.adapters.python`
+						request = "launch",
+						JustMyCode = false,
+						name = "Launch file in externalTerminal",
+						-- Options below are for debugpy, see https://github.com/microsoft/debugpy/wiki/Debug-configuration-settings for supported options
+						program = "${file}", -- This configuration will launch the current file if used.
+						args = function()
+							local str = vim.fn.input("Cache Mode")
+							if str == "" or str == "None" then
+								return nil
+							end
+
+							if str == "enable" or str == "clear" then
+								return {"--cache", str}
+							end
+
+							return {}
+						end,
+						console = "externalTerminal",
+						command = "C:/Users/wilsonchen/AppData/Local/Microsoft/WindowsApps/wt.exe",
+						pythonPath = function()
+							-- debugpy supports launching an application with a different interpreter then the one used to launch debugpy itself.
+							-- The code below looks for a `venv` or `.venv` folder in the current directly and uses the python within.
+							-- You could adapt this - to for example use the `VIRTUAL_ENV` environment variable.
+							local cwd = vim.fn.getcwd()
+							if vim.fn.executable(cwd .. "/venv/Scripts/pythonw.exe") == 1 then
+								return pythonpath
+							elseif vim.fn.executable(cwd .. "/.venv/Scripts/pythonw.exe") == 1 then
+								return pythonpath
+							else
+								-- Please modify your code here to auto-select initial program
+								local current_env_python = os.getenv('CONDA_DEFAULT_ENV')
+								return "C:\\Users\\wilsonchen\\AppData\\Local\\anaconda3\\envs\\" .. current_env_python .. "\\python.exe"
+							end
+						end,
+						repl_lang = "python",
+					},
+				}
+				print("Dap: Normal Debug")
+			end
+			end,
+		{ desc = "Change Debug Config to Streamlit App" })
+
+		vim.keymap.set("n", "<F9>", dap.toggle_breakpoint, { desc = "Debug: Toggle Breakpoint" })
+		vim.keymap.set("n", "<F2>", dap.step_into, { desc = "Debug: Step Into" })
+		vim.keymap.set("n", "<F11>", dap.step_out, { desc = "Debug: Step Out" })
+		vim.keymap.set("n", "<leader>do", dap.step_over, { desc = "Debug: Step Over" })
+		vim.keymap.set("n", "<F3>", goto.next, { desc = "Debug: Jump Breakpoint" })
+		vim.keymap.set("n", "<F4>", goto.stopped, { desc = "Debug: Jump To Stopped Line" })
+		vim.keymap.set('n', '<F8>', function()
+			local input = vim.fn.input("Breakpoint condition: ")
+			require('dap').toggle_breakpoint(input)
+			end
+		)
+		vim.keymap.set("n", "<S-F5>", function()
+			dap.terminate()
+		end, { desc = "Debug: Terminate" })
 		vim.keymap.set("n", "<F5>", function()
 			if vim.g.neovide and _G.isZenMode then
 				vim.g.neovide_padding_left = 0
 				_G.isZenMode = false
 			end
-
 			dap.continue()
-			end, { desc = "Debug: Start/Continue" })
-		vim.keymap.set("n", "<F2>", dap.step_into, { desc = "Debug: Step Into" })
-		vim.keymap.set("n", "<F3>", goto.next, { desc = "Debug: Jump Breakpoint" })
-		vim.keymap.set("n", "<F4>", goto.stopped, { desc = "Debug: Jump To Stopped Line" })
-		vim.keymap.set("n", "<S-F5>", function() 
-			dap.terminate()
-		end, { desc = "Debug: Terminate" })
+		end, { desc = "Debug: Continue" })
+
 		-- vim.keymap.set("n", "<F8>", function()
 		-- 	dap.set_breakpoint(vim.fn.input("Breakpoint condition: "))
 		-- 	end, { desc = "Debug: Set Breakpoint" })
@@ -156,7 +266,6 @@ return { {
 				{elements = {"scopes","stacks", "breakpoints"}, size = 50, position = "left"}, --  "watches"
 				{elements = {"repl"}, size = 0.25, position = "bottom"}
 			}
-			
 		})
 
 		-- Toggle to see last session result. Without this, you can't see session output in case of unhandled exception.
@@ -169,7 +278,7 @@ return { {
 		sign("DapLogPoint", { text = "◆", texthl = "DapLogPoint", linehl = "", numhl = ""})
 		sign('DapStopped', { text='', texthl='DapStopped', linehl='DapStopped', numhl= 'DapStopped' })
 
-		dap.listeners.after.event_initialized["dapui_config"] = function() 
+		dap.listeners.after.event_initialized["dapui_config"] = function()
 			dapui.open()
 			_G.isNvimDapRunning = true
 		end
@@ -216,20 +325,20 @@ return { {
 			})
 		end
 	},
-	{
-		"Weissle/persistent-breakpoints.nvim",
-		config = function()
-			require("persistent-breakpoints").setup{load_breakpoints_event = {"BufReadPost"}}
-			vim.keymap.set("n", "<F9>", function()
-				vim.cmd( "lua require('persistent-breakpoints.api').toggle_breakpoint() ")
-			end,
-			{ desc = "debug: toggle breakpoint" })
-			vim.keymap.set("n", "<F8>", function()
-				vim.cmd( "lua require('persistent-breakpoints.api').set_conditional_breakpoint() ")
-			end,
-			{ desc = "debug: toggle breakpoint" })
-		end
-	}
+	-- {
+	-- 	"Weissle/persistent-breakpoints.nvim",
+	-- 	config = function()
+	-- 		require("persistent-breakpoints").setup{load_breakpoints_event = {"BufReadPost"}}
+	-- 		vim.keymap.set("n", "<F9>", function()
+	-- 			vim.cmd( "lua require('persistent-breakpoints.api').toggle_breakpoint() ")
+	-- 		end,
+	-- 		{ desc = "debug: toggle breakpoint" })
+	-- 		vim.keymap.set("n", "<F8>", function()
+	-- 			vim.cmd( "lua require('persistent-breakpoints.api').set_conditional_breakpoint() ")
+	-- 		end,
+	-- 		{ desc = "debug: toggle breakpoint" })
+	-- 	end
+	-- }
 }
 --
 -- vim.keymap.set('n', '<leader>ll', function() add_line(vim.fn.getreg('"')) end, {buffer = vim.fn.bufnr("dap-repl")})

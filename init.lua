@@ -7,12 +7,12 @@ vim.g.conform_black_options = "--line-length 120"
 
 if vim.g.neovide then
 	local alpha = function()
-		return string.format("%x", math.floor((255 * vim.g.transparency) or 0.8))
+		return string.format("%x", math.floor((255 * vim.g.transparency) or 0.9))
 	end
 	vim.o.guifont = "FiraCode Nerd Font:h12"
 	-- vim.o.guifont = "JetBrainsMonoNL Nerd Font:h12"
-	vim.g.neovide_transparency = 0.95
-	vim.g.transparency = 0.8
+	vim.g.neovide_transparency = 0.8
+	vim.g.transparency = 0.5
 	vim.g.neovide_background_color = "#0f1117" .. alpha()
 	vim.g.neovide_window_blurred = true
 	vim.g.neovide_floating_blurred = true
@@ -27,7 +27,10 @@ if vim.g.neovide then
 	vim.g.neovide_show_border = true
 	vim.api.nvim_set_keymap("i", "<c-v>", "<c-r>+", { noremap = true })
 	vim.api.nvim_set_keymap("c", "<c-v>", "<c-r>+", { noremap = true })
+else
+  vim.opt.guicursor = "n-v-i-c:block-Cursor"
 end
+
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -44,6 +47,9 @@ vim.opt.colorcolumn = "120"
 vim.opt.textwidth = 0
 vim.opt.wrap = false
 vim.opt.conceallevel = 2
+
+-- Fat Cursor
+
 -- Stop autoindenting next line.
 vim.cmd([[autocmd FileType * set formatoptions-=ro]])
 -- You can also add relative line numbers, to help with jumping.
@@ -52,11 +58,17 @@ vim.cmd([[autocmd FileType * set formatoptions-=ro]])
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = "a"
--- Change default shell to powershellfolke/edgy.nvim
 vim.opt.shell = "C:/Users/wilsonchen/AppData/Local/Microsoft/WindowsApps/Microsoft.PowerShell_8wekyb3d8bbwe/pwsh.exe"
 vim.opt.shell = "pwsh"
 vim.opt.shellcmdflag = "-nologo -noprofile -ExecutionPolicy RemoteSigned -command"
 vim.opt.shellxquote = ""
+
+
+-- vim.opt.shell = "C:/Users/wilsonchen/AppData/Local/Programs/nu/bin/nu.exe"
+-- vim.o.shellcmdflag = '-c'
+-- vim.o.shellquote = ''
+-- vim.o.shellxquote = ''
+
 -- Don't show the mode, since it's already in the status line
 vim.opt.showmode = false
 
@@ -129,7 +141,9 @@ vim.keymap.set("n", "<C-PageDown>", function()
 end, { desc = "Go to next buffer" })
 vim.keymap.set("n", "<leader>a", function()
 	vim.cmd("w")
-	vim.cmd("bd")
+  local old_buf = vim.api.nvim_get_current_buf()
+  vim.cmd("bnext")
+  vim.cmd('bdelete ' .. old_buf)
 end, { desc = "" })
 
 -- Keymaps
@@ -149,20 +163,12 @@ else
 end
 -- vim.keymap.set("n", "<C-z>", "<cmd>ZenMode<CR>")
 
--- Easiest Way to Escape Command Mode.
--- vim.keymap.set("t", "<ESC>", function()
--- 	vim.cmd('call feedkeys("\\<Esc>", "n")')
--- 	vim.cmd('call feedkeys("\\<Esc>", "n")')
--- 	vim.cmd("wincmd h")
--- end)
-
 -- Easiest Way to Escape Insert Mode.
 -- Use jk to escape insert mode
 vim.keymap.set("i", "jk", "<ESC>", { noremap = true, silent = true })
--- NOTE: This won't work in all terminal emulators/tmux/etc. Try your own mapping
--- or just use <C-\><C-n> to exit terminal mode
 vim.keymap.set("t", "jk", "<C-\\><C-n>", { noremap = true, silent = true })
 vim.keymap.set("t", "<ESC>", "<C-\\><C-n>", { noremap = true, silent = true })
+
 -- vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -197,6 +203,8 @@ vim.keymap.set("n", "q", function()
 end, { desc = "Quit" })
 -- Remap the keymap for recording macros
 vim.api.nvim_set_keymap("n", "<leader>rr", "q", { noremap = true })
+-- vim.keymap.set("n", ">", ">>", { desc = "Indent line" })
+-- vim.keymap.set("n", "<", "<<", { desc = "Indent line" })
 
 --local Path = require("plenary.path")
 --local current_directory = Path:new("."):absolute()
@@ -237,6 +245,8 @@ vim.keymap.set("n", "+", "<cmd>30winc ><CR>", { noremap = true, silent = true })
 vim.keymap.set("n", "-", "<cmd>30winc <<CR>", { noremap = true, silent = true })
 vim.keymap.set("n", "<C-w>-", "<cmd>10winc -<CR>", { noremap = true, silent = true })
 vim.keymap.set("n", "<C-w>+", "<cmd>10winc +<CR>", { noremap = true, silent = true })
+vim.keymap.set("n", "<C-w>_", "<cmd>vertical resize |<CR>", { noremap = true, silent = true })
+vim.keymap.set("n", "<C-w>|", "<cmd>horizontal resize _<CR>", { noremap = true, silent = true })
 -- [[ Basic Autocommands ]
 --  See `:help lua-guide-`
 
@@ -400,6 +410,8 @@ require("lazy").setup({
 			})
 			require("notify").setup({
 				background_colour = "#000000",
+        max_width = 30,
+        max_height = 20,
 				-- on_open = function(win)
 				-- 	vim.api.nvim_win_set_config(win, { focusable = false })
 				-- end,
@@ -618,7 +630,8 @@ require("lazy").setup({
 			end, { desc = "[S]earch [F]iles" })
 			--vim.keymap.set("n", "<leader>ss", builtin.builtin, { desc = "[S]earch [S]elect Telescope" })
 			-- vim.keymap.set("n", "<leader>sw", builtin.grep_string, { desc = "[S]earch current [W]ord" })
-			vim.keymap.set("n", "<leader>sb", builtin.buffers, { desc = "[S]earch by [B]uffers" })
+      -- I will user buffer manager to manage my buffer going forward.
+			-- vim.keymap.set("n", "<leader>sb", builtin.buffers, { desc = "[S]earch by [B]uffers" })
 			vim.keymap.set("n", "<leader>sg", builtin.live_grep, { desc = "[S]earch by [G]rep" })
 			vim.keymap.set("n", "<leader>sd", builtin.diagnostics, { desc = "[S]earch [D]iagnostics" })
 			vim.keymap.set("n", "<leader>sr", builtin.resume, { desc = "[S]earch [R]esume" })
@@ -926,7 +939,6 @@ require("lazy").setup({
 
 					-- Find references for the word under your cursor.
 					map("gr", require("telescope.builtin").lsp_references, "[G]oto [R]eferences")
-          map("<leader>gr", vim.lsp.buf.references, "[G]oto [R]eferences")
 
 					-- Jump to the implementation of the word under your cursor.
 					--  Useful when your language has ways of declaring types without an actual implementation.
@@ -1509,6 +1521,11 @@ require("lazy").setup({
                   i(2, "row number"),
                   t({"))"}),
                 }),
+                s("type", {
+                  t({"print(type("}),
+                  i(1, "var"),
+                  t({")"}),
+                }),
 							})
 							require("luasnip").add_snippets("lua", {
 								s("config", {
@@ -1521,10 +1538,10 @@ require("lazy").setup({
 					},
 				},
 			},
+      -- Adds other completion capabilities.
+      --  nvim-cmp does not ship with all sources by default. They are split
+      --  into multiple repos for maintenance purposes.
 			"saadparwaiz1/cmp_luasnip",
-			-- Adds other completion capabilities.
-			--  nvim-cmp does not ship with all sources by default. They are split
-			--  into multiple repos for maintenance purposes.
 			"hrsh7th/cmp-nvim-lsp",
 			"hrsh7th/cmp-path",
 			"hrsh7th/cmp-cmdline",
@@ -1652,6 +1669,13 @@ require("lazy").setup({
 					},
 				},
 			})
+      -- Setting up auto completion for sql files
+      cmp.setup.filetype({"sql"}, {
+        sources = {
+          {name = "vim-dadbod-completion"},
+          {name = "buffer"}
+        }
+      })
 		end,
 	},
   -- Couldn't get this working as well....
@@ -1758,6 +1782,7 @@ require("lazy").setup({
 	require("kickstart.plugins.lint"),
 	require("wilsonchen.textobject"),
 	require("wilsonchen.bookmark"),
+	require("wilsonchen.buffermanager"),
 	require("wilsonchen.project"),
 	require("wilsonchen.dashboard"),
 	require("wilsonchen.colortheme"),
@@ -1773,6 +1798,11 @@ require("lazy").setup({
 	require("wilsonchen.outline"),
 	require("wilsonchen.obsidian"),
 	require("wilsonchen.latex"),
+	require("wilsonchen.troublemaker"),
+  require("wilsonchen.refactor"),
+  require("wilsonchen.dadbod"),
+  -- require("wilsonchen.dadbod_bg")
+
 
 	-- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
 	--    This is the easiest way to modularize your config.
@@ -1802,9 +1832,8 @@ require("lazy").setup({
 	},
 })
 -- Setting up colortheme.
--- vim.cmd.colorscheme("vscode")
 vim.cmd.colorscheme("catppuccin-macchiato")
--- vim.cmd.colorscheme("tokyonight-night")
+-- vim.cmd.colorscheme("vague")
 -- vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
 -- vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
 -- vim.api.nvim_set_hl(0, "LineNr", { fg = "#7f7f7f" })
