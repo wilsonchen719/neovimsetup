@@ -51,7 +51,9 @@ vim.opt.conceallevel = 2
 -- Fat Cursor
 
 -- Stop autoindenting next line.
-vim.cmd([[autocmd FileType * set formatoptions-=ro]])
+vim.opt.formatoptions = "cro" -- Auto-wrap comments using textwidth
+-- vim.cmd([[autocmd FileType * set formatoptions-=ro]])
+
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
 -- vim.opt.relativenumber = true
