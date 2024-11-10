@@ -34,14 +34,14 @@ return {
 			sections = {
 				lualine_a = { "mode" },
 				lualine_b = { "branch", "diff", "diagnostics" },
-				lualine_c = {
-					{ 'buffers',
-						 buffers_color = {
-						 active = { bg = colors.bg, fg = colors.fg },
-						 inactive = { bg = colors.bg_inactive, fg = colors.fg_inactive },
-						}
-				  }
-				},
+				-- lualine_c = {
+				-- 	{ 'buffers',
+				-- 		 buffers_color = {
+				-- 		 active = { bg = colors.bg, fg = colors.fg },
+				-- 		 inactive = { bg = colors.bg_inactive, fg = colors.fg_inactive },
+				-- 		}
+				--   }
+				-- },
 				lualine_w = {"tabline"},
 				lualine_x = { "encoding", "fileformat", "filetype" },
 				lualine_y = { "progress" },
