@@ -47,6 +47,8 @@ vim.opt.colorcolumn = "120"
 vim.opt.textwidth = 0
 vim.opt.wrap = false
 vim.opt.conceallevel = 2
+vim.o.swapfile = false
+
 
 -- Fat Cursor
 
@@ -135,18 +137,21 @@ vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Show diagn
 vim.keymap.set("n", "Q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
 
 -- Keymaps to jump between buffers.
-vim.keymap.set("n", "<C-PageUp>", function()
-	vim.cmd("bprevious")
-end, { desc = "Go to previous buffer" })
-vim.keymap.set("n", "<C-PageDown>", function()
-	vim.cmd("bnext")
-end, { desc = "Go to next buffer" })
-vim.keymap.set("n", "<leader>a", function()
-	vim.cmd("w")
-  local old_buf = vim.api.nvim_get_current_buf()
-  vim.cmd("bnext")
-  vim.cmd('bdelete ' .. old_buf)
-end, { desc = "" })
+-- vim.keymap.set("n", "<C-PageUp>", function()
+-- 	vim.cmd("bprevious")
+-- end, { desc = "Go to previous buffer" })
+--
+-- vim.keymap.set("n", "<C-PageDown>", function()
+-- 	vim.cmd("bnext")
+-- end, { desc = "Go to next buffer" })
+--
+-- vim.keymap.set("n", "<leader>a", function()
+-- 	vim.cmd("w")
+--   local old_buf = vim.api.nvim_get_current_buf()
+--   vim.cmd("bnext")
+--   vim.cmd('bdelete ' .. old_buf)
+-- end, { desc = "" })
+--
 
 -- Keymaps
 
@@ -262,6 +267,7 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 		vim.highlight.on_yank()
 	end,
 })
+
 -- Create autocmd to set keymaps for oil://* buffers
 
 -- [[ Install `lazy.nvim` plugin manager ]]
@@ -633,7 +639,8 @@ require("lazy").setup({
 			--vim.keymap.set("n", "<leader>ss", builtin.builtin, { desc = "[S]earch [S]elect Telescope" })
 			-- vim.keymap.set("n", "<leader>sw", builtin.grep_string, { desc = "[S]earch current [W]ord" })
       -- I will user buffer manager to manage my buffer going forward.
-			-- vim.keymap.set("n", "<leader>sb", builtin.buffers, { desc = "[S]earch by [B]uffers" })
+      --
+			vim.keymap.set("n", "<leader>sb", builtin.buffers, { desc = "[S]earch by [B]uffers" })
 			vim.keymap.set("n", "<leader>sg", builtin.live_grep, { desc = "[S]earch by [G]rep" })
 			vim.keymap.set("n", "<leader>sd", builtin.diagnostics, { desc = "[S]earch [D]iagnostics" })
 			vim.keymap.set("n", "<leader>sr", builtin.resume, { desc = "[S]earch [R]esume" })
@@ -1783,8 +1790,6 @@ require("lazy").setup({
 	-- require 'kickstart.plugins.indent_line',
 	require("kickstart.plugins.lint"),
 	require("wilsonchen.textobject"),
-	require("wilsonchen.bookmark"),
-	require("wilsonchen.buffermanager"),
 	require("wilsonchen.project"),
 	require("wilsonchen.dashboard"),
 	require("wilsonchen.colortheme"),
@@ -1798,12 +1803,11 @@ require("lazy").setup({
 	require("wilsonchen.lualine"),
 	require("wilsonchen.undo"),
 	require("wilsonchen.outline"),
-	require("wilsonchen.obsidian"),
-	require("wilsonchen.latex"),
 	require("wilsonchen.troublemaker"),
   require("wilsonchen.refactor"),
+  require("wilsonchen.harpoon"),
   require("wilsonchen.dadbod"),
-  -- require("wilsonchen.dadbod_bg")
+  require("wilsonchen.bufdel"),
 
 
 	-- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`

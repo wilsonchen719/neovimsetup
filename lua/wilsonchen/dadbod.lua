@@ -12,10 +12,6 @@ return {
 		"DBUIFindBuffer",
 	},
 	init = function ()
-		vim.keymap.set("n", "<leader>db", ":DBUIToggle<CR>")
-		vim.api.nvim_del_keymap('n', '<C-j>')
-		vim.keymap.set("n", "<C-j>", "<C-w><C-j>", { desc = "Move focus to the lower window" })
-		vim.api.nvim_del_keymap('n', '<C-k>')
-		vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
+		vim.keymap.set("n", "<leader>db", function() vim.cmd('tabnew') vim.cmd( 'DBUIToggle' )end)
 	end
 }
