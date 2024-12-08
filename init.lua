@@ -137,21 +137,21 @@ vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Show diagn
 vim.keymap.set("n", "Q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
 
 -- Keymaps to jump between buffers.
--- vim.keymap.set("n", "<C-PageUp>", function()
--- 	vim.cmd("bprevious")
--- end, { desc = "Go to previous buffer" })
---
--- vim.keymap.set("n", "<C-PageDown>", function()
--- 	vim.cmd("bnext")
--- end, { desc = "Go to next buffer" })
---
--- vim.keymap.set("n", "<leader>a", function()
--- 	vim.cmd("w")
---   local old_buf = vim.api.nvim_get_current_buf()
---   vim.cmd("bnext")
---   vim.cmd('bdelete ' .. old_buf)
--- end, { desc = "" })
---
+vim.keymap.set("n", "<C-PageUp>", function()
+	vim.cmd("bprevious")
+end, { desc = "Go to previous buffer" })
+
+vim.keymap.set("n", "<C-PageDown>", function()
+	vim.cmd("bnext")
+end, { desc = "Go to next buffer" })
+
+vim.keymap.set("n", "<leader>a", function()
+	vim.cmd("w")
+  local old_buf = vim.api.nvim_get_current_buf()
+  vim.cmd("bnext")
+  vim.cmd('bdelete ' .. old_buf)
+end, { desc = "" })
+
 
 -- Keymaps
 
@@ -610,7 +610,34 @@ require("lazy").setup({
 						prompt_position = "top",
 					},
 					sorting_strategy = "ascending",
-				},
+          file_ignore_patterns = {
+            "%.git/",         -- Git directory
+            "%.jpg",          -- JPEG images
+            "%.jpeg",         -- JPEG images
+            "%.png",          -- PNG images
+            "%.bmp",          -- Bitmap images
+            "%.gif",          -- GIF images
+            "%.svg",          -- SVG images
+            "%.ico",          -- Icon files
+            "%.zip",          -- ZIP archives
+            "%.tar",          -- TAR archives
+            "%.tar.gz",       -- TAR.GZ archives
+            "%.rar",          -- RAR archives
+            "%.exe",          -- Executable files
+            "%.dll",          -- DLL files
+            "%.bin",          -- Binary files
+            "%.obj",          -- Object files
+            "%.o",            -- Object files
+            "%.so",           -- Shared object files
+            "%.dylib",        -- Dynamic library files
+            "%.class",        -- Java class files
+            "%.jar",          -- Java JAR files
+            "%.pyc",          -- Python compiled files
+            "%.pyo",          -- Python optimized files
+            "%.DS_Store",     -- macOS system files
+            "thumbs.db"       -- Windows thumbnail cache
+          }
+        },
 				-- pickers = {
 				-- 	{
 				-- 		layout_config = {
@@ -1238,6 +1265,8 @@ require("lazy").setup({
 				merge_keywords = true,
 				keywords = {
 					CELL = { icon = "⚡", color = "hint" },
+					CONSTRAINT = { icon = "🔒", color = "warning", alt = {"CONST", "Constraint"} },
+					OBJECTIVE = { icon = "🎯", color = "info" , alt = {"OBJ","Objective"} },
 				},
 				-- signs = true, -- show icons in the signs column
 				-- sign_priority = 8, -- sign priority
@@ -1535,6 +1564,13 @@ require("lazy").setup({
                   i(1, "var"),
                   t({")"}),
                 }),
+                s("relationship", {
+                  t({"relationship (\""}),
+                  i(1, "ClassName"),
+                  t({"\", back_populates=\""}),
+                  i(2, "ClassAttr"),
+                  t({"\",cascade=\"all, delete-orphan\")"}),
+                }),
 							})
 							require("luasnip").add_snippets("lua", {
 								s("config", {
@@ -1805,7 +1841,7 @@ require("lazy").setup({
 	require("wilsonchen.outline"),
 	require("wilsonchen.troublemaker"),
   require("wilsonchen.refactor"),
-  require("wilsonchen.harpoon"),
+  -- require("wilsonchen.harpoon"),
   require("wilsonchen.dadbod"),
   require("wilsonchen.bufdel"),
 
@@ -1839,6 +1875,12 @@ require("lazy").setup({
 })
 -- Setting up colortheme.
 vim.cmd.colorscheme("catppuccin-macchiato")
+vim.cmd [[highlight Normal ctermbg=none guibg=none]]
+vim.cmd [[highlight NonText ctermbg=none guibg=none]]
+vim.cmd [[highlight LineNr ctermbg=none guibg=none]]
+vim.cmd [[highlight Folded ctermbg=none guibg=none]]
+vim.cmd [[highlight EndOfBuffer ctermbg=none guibg=none]]
+
 -- vim.cmd.colorscheme("vague")
 -- vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
 -- vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
