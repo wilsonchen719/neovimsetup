@@ -37,7 +37,7 @@ return {
 			sections = {
 				lualine_a = { "mode" },
 				lualine_b = { "branch", "diff", "diagnostics" },
-				lualine_c = {"harpoon2"},
+				-- lualine_c = {"harpoon2"},
 				lualine_c = {
 					{ 'buffers',
 						 buffers_color = {
