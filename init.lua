@@ -914,19 +914,62 @@ require("lazy").setup({
 		"neovim/nvim-lspconfig",
 		dependencies = {
 			-- Automatically install LSPs and related tools to stdpath for Neovim
+      -- "saghen/blink.cmp",
 			"williamboman/mason.nvim",
+      "WhoIsSethDaniel/mason-tool-installer.nvim",
 			"williamboman/mason-lspconfig.nvim",
-			"WhoIsSethDaniel/mason-tool-installer.nvim",
 
 			-- Useful status updates for LSP.
 			-- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
 			{ "j-hui/fidget.nvim", opts = {} },
 
 			-- `neodev` configures Lua LSP for your Neovim config, runtime and plugins
-			-- used for completion, annotations and signatures of Neovim apis
+			-- used for completion, annotations and signatures of Neovim apisnvim
 			{ "folke/neodev.nvim", opts = {} },
 		},
-		config = function()
+    opts = {
+
+			servers = {
+				-- clangd = {},
+				-- gopls = {},
+				-- pyright = {},
+				-- rust_analyzer = {},
+				-- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
+				--
+				-- Some languages (like typescript) have entire language plugins that can be useful:
+				--    https://github.com/pmizio/typescript-tools.nvim
+				--
+				-- But for many setups, the LSP (`tsserver`) will work just fine
+				-- tsserver = {},
+				--
+
+				lua_ls = {
+					-- cmd = {...},
+					-- filetypes = { ...},
+					-- capabilities = {},
+					settings = {
+						Lua = {
+							completion = {
+								callSnippet = "Replace",
+							},
+							hint = { enable = true },
+							-- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
+							-- diagnostics = { disable = { 'missing-fields' } },
+						},
+					},
+				},
+				basedpyright = {
+					enabled = true,
+					settings = {
+						basedpyright = {
+							typeCheckingMode = "basic",
+              reportUnsupportedStringEscape = "off",
+						},
+					},
+				},
+			}
+    },
+		config = function(_, opts)
 			-- Brief aside: **What is LSP?**
 			--
 			-- LSP is an initialism you've probably heard, but might not understand what it is.
@@ -1006,100 +1049,92 @@ require("lazy").setup({
 			--  - capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
 			--  - settings (table): Override the default settings passed when initializing the server.
 			--        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
-			local servers = {
-				-- clangd = {},
-				-- gopls = {},
-				-- pyright = {},
-				-- rust_analyzer = {},
-				-- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
-				--
-				-- Some languages (like typescript) have entire language plugins that can be useful:
-				--    https://github.com/pmizio/typescript-tools.nvim
-				--
-				-- But for many setups, the LSP (`tsserver`) will work just fine
-				-- tsserver = {},
-				--
+      --
 
-				lua_ls = {
-					-- cmd = {...},
-					-- filetypes = { ...},
-					-- capabilities = {},
-					settings = {
-						Lua = {
-							completion = {
-								callSnippet = "Replace",
-							},
-							hint = { enable = true },
-							-- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
-							-- diagnostics = { disable = { 'missing-fields' } },
-						},
-					},
-				},
-				basedpyright = {
-					enabled = true,
-					settings = {
-						basedpyright = {
-							typeCheckingMode = "basic",
-              reportUnsupportedStringEscape = "off",
-						},
-					},
-				},
-				-- pyright = {
-				-- 	settings = {
-				-- 		python = {
-				-- 			analysis = { typeCheckingMode = "off" },
-				-- 			hint = { enable = true },
-				-- 		},
-				-- 	},
-				-- },
-			}
-
-			-- Ensure the servers and tools above are installed
-			--  To check the current status of installed tools and/or manually install
-			--  other tools, you can run
-			--    :Mason
+			-- local servers = {
+			-- 	-- clangd = {},
+			-- 	-- gopls = {},
+			-- 	-- pyright = {},
+			-- 	-- rust_analyzer = {},
+			-- 	-- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
+			-- 	--
+			-- 	-- Some languages (like typescript) have entire language plugins that can be useful:
+			-- 	--    https://github.com/pmizio/typescript-tools.nvim
+			-- 	--
+			-- 	-- But for many setups, the LSP (`tsserver`) will work just fine
+			-- 	-- tsserver = {},
+			-- 	--
 			--
-			--  You can press `g?` for help in this menu.
+			-- 	lua_ls = {
+			-- 		-- cmd = {...},
+			-- 		-- filetypes = { ...},
+			-- 		-- capabilities = {},
+			-- 		settings = {
+			-- 			Lua = {
+			-- 				completion = {
+			-- 					callSnippet = "Replace",
+			-- 				},
+			-- 				hint = { enable = true },
+			-- 				-- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
+			-- 				-- diagnostics = { disable = { 'missing-fields' } },
+			-- 			},
+			-- 		},
+			-- 	},
+			-- 	basedpyright = {
+			-- 		enabled = true,
+			-- 		settings = {
+			-- 			basedpyright = {
+			-- 				typeCheckingMode = "basic",
+			--            reportUnsupportedStringEscape = "off",
+			-- 			},
+			-- 		},
+			-- 	},
+			-- }
+			-- LSP servers and clients are able to communicate to each other what features they support.
+			--  By default, Neovim doesn't support everything that is in the LSP specification.
+			--  When you add nvim-cmp, luasnip, etc. Neovim now has *more* capabilities.
+			--  So, we create new capabilities with nvim cmp, and then broadcast that to the servers.
+			-- local capabilities = vim.lsp.protocol.make_client_capabilities()
+			-- capabilities = vim.tbl_deep_extend("force", capabilities, require("cmp_nvim_lsp").default_capabilities())
+      -- local capabilities = vim.lsp.protocol.make_client_capabilities()
+      -- capabilities = vim.tbl_deep_extend("force", capabilities, require("cmp_nvim_lsp").default_capabilities())
+
 			require("mason").setup()
-
-			-- You can add other tools here that you want Mason to install
-			-- for you, so that they are available from within Neovim.
-			local ensure_installed = vim.tbl_keys(servers or {})
-
-			vim.list_extend(ensure_installed, {
-				"stylua", -- Used to format Lua code
-			})
-			require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
-
-			require("mason-lspconfig").setup({
-				handlers = {
-					function(server_name)
-						local server = servers[server_name] or {}
-						-- This handles overriding only values explicitly passed
-						-- by the server configuration above. Useful when disabling
-						-- certain features of an LSP (for example, turning off formatting for tsserver)
-						server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
-						require("lspconfig")[server_name].setup(server)
-					end,
-				},
-			})
+			--
+			-- -- You can add other tools here that you want Mason to install
+			-- -- for you, so that they are available from within Neovim.
+			 local ensure_installed = vim.tbl_keys(opts.servers or {})
+			 vim.list_extend(ensure_installed, {
+			 	"stylua", -- Used to format Lua code
+			 })
+			 require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
+			 -- require("mason-lspconfig").setup({
+			 --
+			 -- 	handlers = {
+			 -- 		function(server_name)
+			 -- 			local server = opts.servers[server_name] or {}
+			 -- 			-- This handles overriding only values explicitly passed
+			 -- 			-- by the server configuration above. Useful when disabling
+			 -- 			-- certain features of an LSP (for example, turning off formatting for tsserver)
+			 -- 			server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
+			 -- 			require("lspconfig")[server_name].setup(server)
+			 -- 		end,
+			 -- 	},
+			 -- })
+			 --
 
 			vim.keymap.set("n", "<leader>h", function()
 				vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ 0 }), { 0 })
 			end, { desc = "Toggle inlay hints" })
+
+      local lspconfig = require("lspconfig")
+      for server, config in pairs(opts.servers) do
+          config.capabilities = require('blink.cmp').get_lsp_capabilities(config.capabilities)
+          lspconfig[server].setup(config)
+      end
+
 		end,
 	},
-	-- {
-	-- 	"nvimtools/none-ls.nvim",
-	-- 	config = function()
-	-- 		local nullls = require("null-ls")
-	-- 		nullls.setup({
-	-- 			sources = {
-	-- 				nullls.builtins.diagnostics.flake8,
-	-- 			},
-	-- 		})
-	-- 	end,
-	-- },
 	{
 		"ofirgall/goto-breakpoints.nvim",
 	},
@@ -1417,293 +1452,348 @@ require("lazy").setup({
 			hooks.register(hooks.type.SCOPE_HIGHLIGHT, hooks.builtin.scope_highlight_from_extmark)
 		end,
 	},
-	{ -- Autocompletion
-		"hrsh7th/nvim-cmp",
-		event = "InsertEnter",
-		dependencies = {
-			-- Snippet Engine & its associated nvim-cmp source
-			{
-				"L3MON4D3/LuaSnip",
-				build = (function()
-					-- Build Step is needed for regex support in snippets.
-					-- This step is not supported in many windows environments.
-					-- Remove the below condition to re-enable on windows.
-					-- if vim.fn.has("win32") == 1 or vim.fn.executable("make") == 0 then
-					-- 	return
-					-- end
-					return "make install_jsregexp"
-				end)(),
-				dependencies = {
-					-- `friendly-snippets` contains a variety of premade snippets.
-					--    See the README about individual language/framework/plugin snippets:
-					--    https://github.com/rafamadriz/friendly-snippets
-					{
-						"rafamadriz/friendly-snippets",
-						config = function()
-							local ls = require("luasnip")
-							-- some shorthands...
-							local s = ls.snippet
-							-- local sn = ls.snippet_node
-							local t = ls.text_node
-							local i = ls.insert_node
-							-- local f = ls.function_node
-							-- local c = ls.choice_node
-							-- local d = ls.dynamic_node
-							-- local r = ls.restore_node
-							-- local l = require("luasnip.extras").lambda
-							-- local rep = require("luasnip.extras").rep
-							-- local p = require("luasnip.extras").partial
-							-- local m = require("luasnip.extras").match
-							-- local n = require("luasnip.extras").nonempty
-							-- local dl = require("luasnip.extras").dynamic_lambda
-							-- local fmt = require("luasnip.extras.fmt").fmt
-							-- local fmta = require("luasnip.extras.fmt").fmta
-							-- local types = require("luasnip.util.types")
-							-- local conds = require("luasnip.extras.conditions")
-							-- local conds_expand = require("luasnip.extras.conditions.expand")
-							require("luasnip.loaders.from_vscode").lazy_load()
-							require("luasnip").add_snippets("python", {
-								s("cell", {
-									t({ "#CELL:" }),
-									i(1, "Name Your Cell Here"),
-									t({ "<CELL>", "" }),
-									i(2, ""),
-									t({ "", "#</CELL>" }),
-								}),
-								s("visi", {
-									t({ "from visidata import vd" }),
-								}),
-							})
-							require("luasnip").add_snippets("all", {
-								s("vd", {
-									t("vd.view_pandas("),
-									i(1, "Df"),
-									t(")"),
-								}),
-                s("col", {
-                  t({"print("}),
-                  i(1, "df_name"),
-                  t({".columns)"}),
-                }),
-                s("dtype", {
-                  t({"print("}),
-                  i(1, "df_name"),
-                  t({".dtypes)"}),
-                }),
-                s("head", {
-                  t({"print("}),
-                  i(1, "df_name"),
-                  t({".head("}),
-                  i(2, "row number"),
-                  t({"))"}),
-                }),
-                s("type", {
-                  t({"print(type("}),
-                  i(1, "var"),
-                  t({")"}),
-                }),
-                s("relationship", {
-                  t({"relationship (\""}),
-                  i(1, "ClassName"),
-                  t({"\", back_populates=\""}),
-                  i(2, "ClassAttr"),
-                  t({"\",cascade=\"all, delete-orphan\")"}),
-                }),
-							})
-							require("luasnip").add_snippets("lua", {
-								s("config", {
-									t({ "config = function()", "" }),
-									i(1, "  insert your config here."),
-									t({ "", "end" }),
-								}),
-							})
-						end,
-					},
-				},
-			},
-      -- Adds other completion capabilities.
-      --  nvim-cmp does not ship with all sources by default. They are split
-      --  into multiple repos for maintenance purposes.
-			"saadparwaiz1/cmp_luasnip",
-			"hrsh7th/cmp-nvim-lsp",
-			"hrsh7th/cmp-path",
-			"hrsh7th/cmp-cmdline",
-		},
-		config = function()
-			-- See `:help cmp`
-			local cmp = require("cmp")
-			local luasnip = require("luasnip")
-			local function border(hl_name)
-				return {
-					{ "╭", hl_name }, -- 0
-					{ "─", hl_name }, -- 1
-					{ "╮", hl_name }, -- 2
-					{ "│", hl_name }, -- 3
-					{ "╯", hl_name }, -- 4
-					{ "─", hl_name }, -- 5
-					{ "╰", hl_name }, -- 6
-					{ "│", hl_name }, -- 7
-				}
-			end
-			vim.api.nvim_set_hl(0, "CmpItemKindClass", { fg = "#73DACA" })
-			vim.api.nvim_set_hl(0, "CmpItemKindConstructor", { fg = "#73DACA" })
-			vim.api.nvim_set_hl(0, "CmpItemKindFunction", { fg = "#FF8080" })
-			vim.api.nvim_set_hl(0, "CmpItemKindKeyword", { fg = "#FF8080" })
-			vim.api.nvim_set_hl(0, "CmpItemKindMethod", { fg = "#FF8080" })
-			vim.api.nvim_set_hl(0, "CmpItemKindModule", { fg = "#73DACA" })
-			vim.api.nvim_set_hl(0, "CmpItemKindSnippet", { fg = "#FFFFFF" })
-			vim.api.nvim_set_hl(0, "CmpItemKindText", { fg = "#FFFFFF" })
-			vim.api.nvim_set_hl(0, "CmpItemKindVariable", { fg = "#73DACA" })
-			local icon = {
-				Class = " Class",
-				Constructor = " Constructor",
-				Function = "󰡱 Function",
-				Keyword = '" Keyword',
-				Method = "󰢷 Method",
-				Module = " Module",
-				Snippet = " Snippet",
-				Text = "󰊄 Text",
-				Variable = "󰀫 Variable",
-			}
-			luasnip.config.setup({})
-			cmp.setup.cmdline("/", {
-				mapping = cmp.mapping.preset.cmdline(),
-				source = { { name = "path" } },
-			})
-			cmp.setup.cmdline(":", {
-				mapping = cmp.mapping.preset.cmdline(),
-				sources = cmp.config.sources({
-					{ name = "path" },
-				}, {
-					{
-						name = "cmdline",
-						option = {
-							ignore_cmds = { "Man", "!" },
-						},
-					},
-				}),
-			})
-			cmp.setup({
-				snippet = {
-					expand = function(args)
-						luasnip.lsp_expand(args.body)
-					end,
-				},
-				completion = { completeopt = "menu,menuone,noinsert" },
-
-				-- For an understanding of why these mappings were
-				-- chosen, you will need to read `:help ins-completion`
-				-- No, but seriously. Please read `:help ins-completion`, it is really good!
-				mapping = cmp.mapping.preset.insert({
-					-- Select the [n]ext item
-					["<C-n>"] = cmp.mapping.select_next_item(),
-					-- Select the [p]revious item
-					["<C-p>"] = cmp.mapping.select_prev_item(),
-
-					-- Scroll the documentation window [b]ack / [f]orward
-					["<C-b>"] = cmp.mapping.scroll_docs(-4),
-					["<C-f>"] = cmp.mapping.scroll_docs(4),
-
-					-- Accept ([y]es) the completion.
-					--  This will auto-import if your LSP supports it.
-					--  This will expand snippets if the LSP sent a snippet.
-					["<C-y>"] = cmp.mapping.confirm({ select = true }),
-
-					-- Manually trigger a completion from nvim-cmp.
-					--  Generally you don't need this, because nvim-cmp will display
-					--  completions whenever it has completion options available.
-					["<C-Space>"] = cmp.mapping.complete({}),
-
-					-- Think of <c-l> as moving to the right of your snippet expansion.
-					--  So if you have a snippet that's like:
-					--  function $name($args)
-					--    $body
-					--  end
-					--
-					-- <c-l> will move you to the right of each of the expansion locations.
-					-- <c-h> is similar, except moving you backwards.
-					["<C-l>"] = cmp.mapping(function()
-						if luasnip.expand_or_locally_jumpable() then
-							luasnip.expand_or_jump()
-						end
-					end, { "i", "s" }),
-					["<C-h>"] = cmp.mapping(function()
-						if luasnip.locally_jumpable(-1) then
-							luasnip.jump(-1)
-						end
-					end, { "i", "s" }),
-					-- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
-					--    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
-				}),
-				sources = {
-					{ name = "nvim_lsp" },
-					{ name = "luasnip" },
-					{ name = "path" },
-				},
-				formatting = {
-					format = function(_, vim_item)
-						vim_item.kind = icon[vim_item.kind] or ""
-						return vim_item
-					end,
-				},
-				window = {
-					documentation = {
-						border = border("CmpDocBorder"),
-					},
-				},
-			})
-      -- Setting up auto completion for sql files
-      cmp.setup.filetype({"sql"}, {
-        sources = {
-          {name = "vim-dadbod-completion"},
-          {name = "buffer"}
-        }
-      })
-		end,
-	},
+  -- {"hrsh7th/nvim-cmp" },
+  -- {"hrsh7th/cmp-cmdline",
+  --   config = function()
+  --     local cmp = require("cmp")
+  --     cmp.setup.cmdline("/",{
+  --       mappings = cmp.mapping.preset.cmdline(),
+  --       sources = {
+  --         { name = "buffer" }
+  --       }
+  --     })
+  --   end
+  -- },
+	-- { -- Autocompletion
+	-- 	"hrsh7th/nvim-cmp",
+	-- 	event = "InsertEnter",
+	-- 	dependencies = {
+	-- 		-- Snippet Engine & its associated nvim-cmp source
+	-- 		{
+	-- 			"L3MON4D3/LuaSnip",
+	-- 			build = (function()
+	-- 				-- Build Step is needed for regex support in snippets.
+	-- 				-- This step is not supported in many windows environments.
+	-- 				-- Remove the below condition to re-enable on windows.
+	-- 				-- if vim.fn.has("win32") == 1 or vim.fn.executable("make") == 0 then
+	-- 				-- 	return
+	-- 				-- end
+	-- 				return "make install_jsregexp"
+	-- 			end)(),
+	-- 			dependencies = {
+	-- 				-- `friendly-snippets` contains a variety of premade snippets.
+	-- 				--    See the README about individual language/framework/plugin snippets:
+	-- 				--    https://github.com/rafamadriz/friendly-snippets
+	-- 				{
+	-- 					"rafamadriz/friendly-snippets",
+	-- 					config = function()
+	-- 						local ls = require("luasnip")
+	-- 						-- some shorthands...
+	-- 						local s = ls.snippet
+	-- 						-- local sn = ls.snippet_node
+	-- 						local t = ls.text_node
+	-- 						local i = ls.insert_node
+	-- 						-- local f = ls.function_node
+	-- 						-- local c = ls.choice_node
+	-- 						-- local d = ls.dynamic_node
+	-- 						-- local r = ls.restore_node
+	-- 						-- local l = require("luasnip.extras").lambda
+	-- 						-- local rep = require("luasnip.extras").rep
+	-- 						-- local p = require("luasnip.extras").partial
+	-- 						-- local m = require("luasnip.extras").match
+	-- 						-- local n = require("luasnip.extras").nonempty
+	-- 						-- local dl = require("luasnip.extras").dynamic_lambda
+	-- 						-- local fmt = require("luasnip.extras.fmt").fmt
+	-- 						-- local fmta = require("luasnip.extras.fmt").fmta
+	-- 						-- local types = require("luasnip.util.types")
+	-- 						-- local conds = require("luasnip.extras.conditions")
+	-- 						-- local conds_expand = require("luasnip.extras.conditions.expand")
+	-- 						require("luasnip.loaders.from_vscode").lazy_load()
+	-- 						require("luasnip").add_snippets("python", {
+	-- 							s("cell", {
+	-- 								t({ "#CELL:" }),
+	-- 								i(1, "Name Your Cell Here"),
+	-- 								t({ "<CELL>", "" }),
+	-- 								i(2, ""),
+	-- 								t({ "", "#</CELL>" }),
+	-- 							}),
+	-- 							s("visi", {
+	-- 								t({ "from visidata import vd" }),
+	-- 							}),
+	-- 						})
+	-- 						require("luasnip").add_snippets("all", {
+	-- 							s("vd", {
+	-- 								t("vd.view_pandas("),
+	-- 								i(1, "Df"),
+	-- 								t(")"),
+	-- 							}),
+	--                s("col", {
+	--                  t({"print("}),
+	--                  i(1, "df_name"),
+	--                  t({".columns)"}),
+	--                }),
+	--                s("dtype", {
+	--                  t({"print("}),
+	--                  i(1, "df_name"),
+	--                  t({".dtypes)"}),
+	--                }),
+	--                s("head", {
+	--                  t({"print("}),
+	--                  i(1, "df_name"),
+	--                  t({".head("}),
+	--                  i(2, "row number"),
+	--                  t({"))"}),
+	--                }),
+	--                s("type", {
+	--                  t({"print(type("}),
+	--                  i(1, "var"),
+	--                  t({")"}),
+	--                }),
+	--                s("relationship", {
+	--                  t({"relationship (\""}),
+	--                  i(1, "ClassName"),
+	--                  t({"\", back_populates=\""}),
+	--                  i(2, "ClassAttr"),
+	--                  t({"\",cascade=\"all, delete-orphan\")"}),
+	--                }),
+	-- 						})
+	-- 						require("luasnip").add_snippets("lua", {
+	-- 							s("config", {
+	-- 								t({ "config = function()", "" }),
+	-- 								i(1, "  insert your config here."),
+	-- 								t({ "", "end" }),
+	-- 							}),
+	-- 						})
+	-- 					end,
+	-- 				},
+	-- 			},
+	-- 		},
+	--      -- Adds other completion capabilities.
+	--      --  nvim-cmp does not ship with all sources by default. They are split
+	--      --  into multiple repos for maintenance purposes.
+	-- 		"saadparwaiz1/cmp_luasnip",
+	-- 		"hrsh7th/cmp-nvim-lsp",
+	-- 		"hrsh7th/cmp-path",
+	-- 		"hrsh7th/cmp-cmdline",
+	-- 	},
+	-- 	config = function()
+	-- 		-- See `:help cmp`
+	-- 		local cmp = require("cmp")
+	-- 		local luasnip = require("luasnip")
+	-- 		local function border(hl_name)
+	-- 			return {
+	-- 				{ "╭", hl_name }, -- 0
+	-- 				{ "─", hl_name }, -- 1
+	-- 				{ "╮", hl_name }, -- 2
+	-- 				{ "│", hl_name }, -- 3
+	-- 				{ "╯", hl_name }, -- 4
+	-- 				{ "─", hl_name }, -- 5
+	-- 				{ "╰", hl_name }, -- 6
+	-- 				{ "│", hl_name }, -- 7
+	-- 			}
+	-- 		end
+	-- 		vim.api.nvim_set_hl(0, "CmpItemKindClass", { fg = "#73DACA" })
+	-- 		vim.api.nvim_set_hl(0, "CmpItemKindConstructor", { fg = "#73DACA" })
+	-- 		vim.api.nvim_set_hl(0, "CmpItemKindFunction", { fg = "#FF8080" })
+	-- 		vim.api.nvim_set_hl(0, "CmpItemKindKeyword", { fg = "#FF8080" })
+	-- 		vim.api.nvim_set_hl(0, "CmpItemKindMethod", { fg = "#FF8080" })
+	-- 		vim.api.nvim_set_hl(0, "CmpItemKindModule", { fg = "#73DACA" })
+	-- 		vim.api.nvim_set_hl(0, "CmpItemKindSnippet", { fg = "#FFFFFF" })
+	-- 		vim.api.nvim_set_hl(0, "CmpItemKindText", { fg = "#FFFFFF" })
+	-- 		vim.api.nvim_set_hl(0, "CmpItemKindVariable", { fg = "#73DACA" })
+	-- 		local icon = {
+	-- 			Class = " Class",
+	-- 			Constructor = " Constructor",
+	-- 			Function = "󰡱 Function",
+	-- 			Keyword = '" Keyword',
+	-- 			Method = "󰢷 Method",
+	-- 			Module = " Module",
+	-- 			Snippet = " Snippet",
+	-- 			Text = "󰊄 Text",
+	-- 			Variable = "󰀫 Variable",
+	-- 		}
+	-- 		luasnip.config.setup({})
+	-- 		cmp.setup.cmdline("/", {
+	-- 			mapping = cmp.mapping.preset.cmdline(),
+	-- 			source = { { name = "path" } },
+	-- 		})
+	-- 		cmp.setup.cmdline(":", {
+	-- 			mapping = cmp.mapping.preset.cmdline(),
+	-- 			sources = cmp.config.sources({
+	-- 				{ name = "path" },
+	-- 			}, {
+	-- 				{
+	-- 					name = "cmdline",
+	-- 					option = {
+	-- 						ignore_cmds = { "Man", "!" },
+	-- 					},
+	-- 				},
+	-- 			}),
+	-- 		})
+	-- 		cmp.setup({
+	-- 			snippet = {
+	-- 				expand = function(args)
+	-- 					luasnip.lsp_expand(args.body)
+	-- 				end,
+	-- 			},
+	-- 			completion = { completeopt = "menu,menuone,noinsert" },
+	--
+	-- 			-- For an understanding of why these mappings were
+	-- 			-- chosen, you will need to read `:help ins-completion`
+	-- 			-- No, but seriously. Please read `:help ins-completion`, it is really good!
+	-- 			mapping = cmp.mapping.preset.insert({
+	-- 				-- Select the [n]ext item
+	-- 				["<C-n>"] = cmp.mapping.select_next_item(),
+	-- 				-- Select the [p]revious item
+	-- 				["<C-p>"] = cmp.mapping.select_prev_item(),
+	--
+	-- 				-- Scroll the documentation window [b]ack / [f]orward
+	-- 				["<C-b>"] = cmp.mapping.scroll_docs(-4),
+	-- 				["<C-f>"] = cmp.mapping.scroll_docs(4),
+	--
+	-- 				-- Accept ([y]es) the completion.
+	-- 				--  This will auto-import if your LSP supports it.
+	-- 				--  This will expand snippets if the LSP sent a snippet.
+	-- 				["<C-y>"] = cmp.mapping.confirm({ select = true }),
+	--
+	-- 				-- Manually trigger a completion from nvim-cmp.
+	-- 				--  Generally you don't need this, because nvim-cmp will display
+	-- 				--  completions whenever it has completion options available.
+	-- 				["<C-Space>"] = cmp.mapping.complete({}),
+	--
+	-- 				-- Think of <c-l> as moving to the right of your snippet expansion.
+	-- 				--  So if you have a snippet that's like:
+	-- 				--  function $name($args)
+	-- 				--    $body
+	-- 				--  end
+	-- 				--
+	-- 				-- <c-l> will move you to the right of each of the expansion locations.
+	-- 				-- <c-h> is similar, except moving you backwards.
+	-- 				["<C-l>"] = cmp.mapping(function()
+	-- 					if luasnip.expand_or_locally_jumpable() then
+	-- 						luasnip.expand_or_jump()
+	-- 					end
+	-- 				end, { "i", "s" }),
+	-- 				["<C-h>"] = cmp.mapping(function()
+	-- 					if luasnip.locally_jumpable(-1) then
+	-- 						luasnip.jump(-1)
+	-- 					end
+	-- 				end, { "i", "s" }),
+	-- 				-- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
+	-- 				--    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
+	-- 			}),
+	-- 			sources = {
+	-- 				{ name = "nvim_lsp" },
+	-- 				{ name = "luasnip" },
+	-- 				{ name = "path" },
+	-- 			},
+	-- 			formatting = {
+	-- 				format = function(_, vim_item)
+	-- 					vim_item.kind = icon[vim_item.kind] or ""
+	-- 					return vim_item
+	-- 				end,
+	-- 			},
+	-- 			window = {
+	-- 				documentation = {
+	-- 					border = border("CmpDocBorder"),
+	-- 				},
+	-- 			},
+	-- 		})
+	--      -- Setting up auto completion for sql files
+	--      cmp.setup.filetype({"sql"}, {
+	--        sources = {
+	--          {name = "vim-dadbod-completion"},
+	--          {name = "buffer"}
+	--        }
+	--      })
+	-- 	end,
+	-- },
   -- Couldn't get this working as well....
-  {
-    "ray-x/lsp_signature.nvim",
-    opts = {},
-    config = function()
-      local cfg = {
-          bind = true,
-          doc_lines = 2,
-          floating_window = true,
-          hint_enable = true,
-          hint_prefix = " ",
-          hint_scheme = "String",
-          use_lspsaga = false,
-          handler_opts = { border = "single" },
-          decorator = {"`", "`"}
-      }
-      require("lsp_signature").on_attach(cfg)
-    end,
-    --   vim.api.nvim_create_autocmd("LspAttach", {
-    --     callback = function(args)
-    --       local bufnr = args.buf
-    --       local client = vim.lsp.get_client_by_id(args.client_id)
-    --       if vim.tbl_contains({"null-ls"}, client.name) then -- blacklist lsp
-    --         return
-    --       end
-    --       require("lsp_signature").on_attach({
-    --         bind = true,
-    --         handler_opts = {
-    --           border = "rounded",
-    --         },
-    --         hint_enable = true,
-    --         hint_prefix = " ",
-    --         hint_scheme = "String",
-    --         use_lspsaga = false,
-    --         z_index = 50,
-    --       }, bufnr)
-    --     end
-    --   })
-    -- end
 
+  {
+    "saghen/blink.cmp",
+    lazy=false,
+    -- dependencies = {"rafamadriz/friendly-snippets", "hrsh7th/cmp-cmdline", "hrsh7th/cmp-path"},
+    dependencies = {"rafamadriz/friendly-snippets" },
+    version = "v0.*",
+
+    --@module 'blink.cmp'
+    --@type blink.cmp.Config
+
+    opts = {
+      keymaps = {
+        preset = 'default',
+      },
+      completion = {
+        list = {
+          max_items = 20,
+          selection = "preselect",
+        },
+        menu ={
+          border = 'rounded',
+          direction_priority = {'s', 'n'},
+          draw = {
+            treesitter = {'lsp'},
+            columns = {{'label', 'label_description', gap = 1}, {'kind_icon', "kind", gap = 1} },
+          }
+        },
+        documentation = {
+          auto_show = true,
+          auto_show_delay_ms = 50,
+          treesitter_highlighting = true,
+          window = {
+            min_width = 15,
+            max_width = 20, -- smaller due to some reported issues...??
+            max_height = 10,
+            border = 'rounded',
+            direction_priority = {
+              menu_north = {'e',"w", "n", "s"},
+            }
+          },
+        },
+      },
+      appearance = {
+        kind_icons = {
+          Class = "",
+          Constructor = "",
+          Function = "󰡱",
+          Keyword = '"',
+          Module = "",
+          Method = "󰢷",
+          Snippet = "",
+          Text = "󰊄",
+          Variable = "󰀫",
+        },
+        nerd_font_variant = 'mono',
+        use_nvim_cmp_as_default = true,
+      },
+      sources = {
+        default = {'lsp', 'path', 'snippets','buffer'},
+        -- cmdline = {},
+      },
+      -- signature = {enabled = true},
+      opts_extend = {'sources.default'},
+    },
   },
+  -- {
+  --   "ray-x/lsp_signature.nvim",
+  --   opts = {},
+  --   config = function()
+  --     local cfg = {
+  --         bind = true,
+  --         doc_lines = 2,
+  --         floating_window = true,
+  --         hint_enable = true,
+  --         hint_prefix = " ",
+  --         hint_scheme = "String",
+  --         use_lspsaga = false,
+  --         handler_opts = { border = "single" },
+  --         decorator = {"`", "`"}
+  --     }
+  --     require("lsp_signature").on_attach(cfg)
+  --   end,
+  -- },
 	{ "kmontocam/nvim-conda" },
-	-- "ubaldot/vim-conda-activate",
 	{
 		"danymat/neogen",
 		config = function()
@@ -1782,6 +1872,7 @@ require("lazy").setup({
   -- require("wilsonchen.harpoon"),
   require("wilsonchen.dadbod"),
   require("wilsonchen.bufdel"),
+  require("wilsonchen.buffermanager"),
 
 
 	-- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
