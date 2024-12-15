@@ -141,7 +141,7 @@ return {
 	config = function()
 		local alpha = require("alpha")
 		local dashboard = require("alpha.themes.dashboard")
-		local index = math.random(1, #M + 1)
+		local index = math.random(1, #M)
 		dashboard.section.header.val = M[index]
 		dashboard.section.buttons.val = {
 			dashboard.button("n", "   New file", ":ene <BAR> startinsert <CR>"),

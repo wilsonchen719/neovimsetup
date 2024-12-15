@@ -9,12 +9,26 @@ return {
 		'letieu/harpoon-lualine',
 	},
 	config = function()
-        local colors = {
-            bg = "#24283b",
-            bg_inactive = "#1f2335",
-            fg = "#c0caf5",
-            fg_inactive = "#3b4261",
-        }
+		local colors = {
+		    bg = "#24283b",
+		    bg_inactive = "#1f2335",
+		    fg = "#c0caf5",
+		    fg_inactive = "#3b4261",
+		}
+
+		local function get_buffer_list()
+			local marks = require("buffer_manager").marks
+			local list_bufs = ""
+			for _, mark in ipairs(marks) do
+				local short_name = require("buffer_manager.utils").get_short_file_name(mark.filename, {})
+				list_bufs = list_bufs .. short_name .. "|"
+				-- table.insert(mytable,#mytable+1, mark.filename)
+				-- print(mark.filename)
+			end
+			return list_bufs
+			-- return [[Hello World]]
+		end
+
 		require("lualine").setup({
 			options = {
 				icons_enabled = true,
@@ -38,14 +52,15 @@ return {
 				lualine_a = { "mode" },
 				lualine_b = { "branch", "diff", "diagnostics" },
 				-- lualine_c = {"harpoon2"},
-				lualine_c = {
-					{ 'buffers',
-						 buffers_color = {
-						 active = { bg = colors.bg, fg = colors.fg },
-						 inactive = { bg = colors.bg_inactive, fg = colors.fg_inactive },
-						}
-				  }
-				},
+				-- lualine_c = {
+				-- 	{ 'buffers',
+				-- 		 buffers_color = {
+				-- 		 active = { bg = colors.bg, fg = colors.fg },
+				-- 		 inactive = { bg = colors.bg_inactive, fg = colors.fg_inactive },
+				-- 		}
+				--   }
+				-- },
+				-- lualine_c = {get_buffer_list},
 				lualine_w = {"tabline"},
 				lualine_x = { "encoding", "fileformat", "filetype" },
 				lualine_y = { "progress" },
