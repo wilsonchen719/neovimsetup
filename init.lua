@@ -914,7 +914,7 @@ require("lazy").setup({
 		"neovim/nvim-lspconfig",
 		dependencies = {
 			-- Automatically install LSPs and related tools to stdpath for Neovim
-			"williamboman/mason.nvim",
+      {"williamboman/mason.nvim", config = true},
 			"williamboman/mason-lspconfig.nvim",
 			"WhoIsSethDaniel/mason-tool-installer.nvim",
 
@@ -925,6 +925,7 @@ require("lazy").setup({
 			-- `neodev` configures Lua LSP for your Neovim config, runtime and plugins
 			-- used for completion, annotations and signatures of Neovim apis
 			{ "folke/neodev.nvim", opts = {} },
+      { "hrsh7th/cmp-nvim-lsp" }
 		},
 		config = function()
 			-- Brief aside: **What is LSP?**
@@ -1006,6 +1007,8 @@ require("lazy").setup({
 			--  - capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
 			--  - settings (table): Override the default settings passed when initializing the server.
 			--        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
+      local capabilities = vim.lsp.protocol.make_client_capabilities()
+      capabilities = vim.tbl_deep_extend('force',capabilities,require('cmp_nvim_lsp').default_capabilities())
 			local servers = {
 				-- clangd = {},
 				-- gopls = {},
@@ -1782,6 +1785,7 @@ require("lazy").setup({
   -- require("wilsonchen.harpoon"),
   require("wilsonchen.dadbod"),
   require("wilsonchen.bufdel"),
+  require("wilsonchen.buffermanager")
 
 
 	-- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
