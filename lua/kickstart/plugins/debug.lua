@@ -33,8 +33,26 @@ return { {
 		local dap = require("dap")
 		local dapui = require("dapui")
 		local goto = require("goto-breakpoints")
+		-- local terminal_path = "C:/Users/wilsonchen/AppData/Local/Programs/nu/bin/nu.exe"
+		local terminal_path = "C:/Users/wilsonchen/AppData/Local/Microsoft/WindowsApps/wt.exe"
 		-- local pythonpath = vim.fn.exepath("python")
-		local pythonpath = "C:\\Users\\wilsonchen\\AppData\\Local\\anaconda3\\envs\\debugpy\\python.exe"
+		-- local pythonpath = "C:\\Users\\wilsonchen\\AppData\\Local\\anaconda3\\envs\\debugpy\\python.exe"
+		local pythonpath = function()
+			local cwd = vim.fn.getcwd()
+			if vim.fn.executable(cwd .. "/venv/Scripts/python.exe") == 1 then
+				-- return pythonpath
+				print(cwd .. "/venv/Scripts/python.exe")
+				return (cwd .. "/venv/Scripts/python.exe")
+			elseif vim.fn.executable(cwd .. "/.venv/Scripts/python.exe") == 1 then
+				print(cwd .. "/.venv/Scripts/python.exe")
+				-- return pythonpath
+				return (cwd .. "/.venv/Scripts/python.exe")
+			else
+				-- Please modify your code here to auto-select initial program
+				local current_env_python = os.getenv('CONDA_DEFAULT_ENV')
+				return "C:\\Users\\wilsonchen\\AppData\\Local\\anaconda3\\envs\\" .. current_env_python .. "\\python.exe"
+			end
+		end
 		--{
 		-- -- Makes a best effort to setup the various debuggers with
 		-- -- reasonable debug configurations
@@ -82,7 +100,7 @@ return { {
 			else
 				cb({
 					type = "executable",
-					command = pythonpath,
+					command = pythonpath(),
 					args = { "-m", "debugpy.adapter" },
 					options = {
 						source_filetype = "python",
@@ -113,30 +131,34 @@ return { {
 					return {}
 				end,
 				console = "externalTerminal",
-				command = "C:/Users/wilsonchen/AppData/Local/Microsoft/WindowsApps/wt.exe",
-				pythonPath = function()
-					-- debugpy supports launching an application with a different interpreter then the one used to launch debugpy itself.
-					-- The code below looks for a `venv` or `.venv` folder in the current directly and uses the python within.
-					-- You could adapt this - to for example use the `VIRTUAL_ENV` environment variable.
-					local cwd = vim.fn.getcwd()
-					if vim.fn.executable(cwd .. "/venv/Scripts/pythonw.exe") == 1 then
-						return pythonpath
-					elseif vim.fn.executable(cwd .. "/.venv/Scripts/pythonw.exe") == 1 then
-						return pythonpath
-					else
-						-- Please modify your code here to auto-select initial program
-						local current_env_python = os.getenv('CONDA_DEFAULT_ENV')
-						return "C:\\Users\\wilsonchen\\AppData\\Local\\anaconda3\\envs\\" .. current_env_python .. "\\python.exe"
-					end
-				end,
+				command = terminal_path,
+				pythonPath = pythonpath,
+				-- pythonPath = function()
+				-- 	-- debugpy supports launching an application with a different interpreter then the one used to launch debugpy itself.
+				-- 	-- The code below looks for a `venv` or `.venv` folder in the current directly and uses the python within.
+				-- 	-- You could adapt this - to for example use the `VIRTUAL_ENV` environment variable.
+				-- 	local cwd = vim.fn.getcwd()
+				-- 	if vim.fn.executable(cwd .. "/venv/Scripts/python.exe") == 1 then
+				-- 		-- return pythonpath
+				-- 		return (cwd .. "/venv/Scripts/python.exe")
+				-- 	elseif vim.fn.executable(cwd .. "/.venv/Scripts/python.exe") == 1 then
+				-- 		-- return pythonpath
+				-- 		return (cwd .. "/.venv/Scripts/python.exe")
+				-- 	else
+				-- 		-- Please modify your code here to auto-select initial program
+				-- 		local current_env_python = os.getenv('CONDA_DEFAULT_ENV')
+				-- 		return "C:\\Users\\wilsonchen\\AppData\\Local\\anaconda3\\envs\\" .. current_env_python .. "\\python.exe"
+				-- 	end
+				--
+				-- end,
 				repl_lang = "python",
 			},
 		}
 
 		dap.defaults.fallback.force_external_terminal = true
 		dap.defaults.fallback.external_terminal = {
-			command ="C:/Users/wilsonchen/AppData/Local/Microsoft/WindowsApps/wt.exe";
-			arg= {};
+			command = terminal_path,
+			-- args= {"-c", '"%command%"'};
 		}
 		-- Basic debugging keymaps, feel free to change to your liking!
 		vim.keymap.set("n", "<C-F5>", function()
@@ -150,34 +172,36 @@ return { {
 							module = "streamlit",
 							args = function()
 								local str = vim.fn.input("Cache Mode: ")
+
 								if str == "" or str == "None" then
-									return {"run", "${file}", "--server.port", "2000", "--", "--cache", "enable"}
+									return {"run", "${file}", "--server.port", "2000", }
 								end
 
 								if str == "enable" or str == "clear" then
 									return {"run", "${file}", "--server.port", "2000", "--", "--cache", str}
 								end
 
-								return {"run", "${file}", "--server.port", "2000", "--", "--cache", "enable"}
+								return {"run", "${file}", "--server.port", "2000"}
 							end,
 							console = "externalTerminal",
 							repl_lang = "python",
-							command = "C:/Users/wilsonchen/AppData/Local/Microsoft/WindowsApps/wt.exe",
-							pythonPath = function()
-							-- debugpy supports launching an application with a different interpreter then the one used to launch debugpy itself.
-							-- The code below looks for a `venv` or `.venv` folder in the current directly and uses the python within.
-							-- You could adapt this - to for example use the `VIRTUAL_ENV` environment variable.
-								local cwd = vim.fn.getcwd()
-								if vim.fn.executable(cwd .. "/venv/Scripts/pythonw.exe") == 1 then
-									return pythonpath
-								elseif vim.fn.executable(cwd .. "/.venv/Scripts/pythonw.exe") == 1 then
-									return pythonpath
-								else
-									-- Please modify your code here to auto-select initial program
-									local current_env_python = os.getenv('CONDA_DEFAULT_ENV')
-									return "C:\\Users\\wilsonchen\\AppData\\Local\\anaconda3\\envs\\" .. current_env_python .. "\\python.exe"
-								end
-							end,
+							command = terminal_path,
+							pythonPath = pythonpath,
+							-- pythonPath = function()
+							-- -- debugpy supports launching an application with a different interpreter then the one used to launch debugpy itself.
+							-- -- The code below looks for a `venv` or `.venv` folder in the current directly and uses the python within.
+							-- -- You could adapt this - to for example use the `VIRTUAL_ENV` environment variable.
+							-- 	local cwd = vim.fn.getcwd()
+							-- 	if vim.fn.executable(cwd .. "/venv/Scripts/python.exe") == 1 then
+							-- 		return pythonpath
+							-- 	elseif vim.fn.executable(cwd .. "/.venv/Scripts/python.exe") == 1 then
+							-- 		return pythonpath
+							-- 	else
+							-- 		-- Please modify your code here to auto-select initial program
+							-- 		local current_env_python = os.getenv('CONDA_DEFAULT_ENV')
+							-- 		return "C:\\Users\\wilsonchen\\AppData\\Local\\anaconda3\\envs\\" .. current_env_python .. "\\python.exe"
+							-- 	end
+							-- end,
 						}
 				}
 				print("DAP: Streamlit App")
@@ -204,22 +228,23 @@ return { {
 							return {}
 						end,
 						console = "externalTerminal",
-						command = "C:/Users/wilsonchen/AppData/Local/Microsoft/WindowsApps/wt.exe",
-						pythonPath = function()
-							-- debugpy supports launching an application with a different interpreter then the one used to launch debugpy itself.
-							-- The code below looks for a `venv` or `.venv` folder in the current directly and uses the python within.
-							-- You could adapt this - to for example use the `VIRTUAL_ENV` environment variable.
-							local cwd = vim.fn.getcwd()
-							if vim.fn.executable(cwd .. "/venv/Scripts/pythonw.exe") == 1 then
-								return pythonpath
-							elseif vim.fn.executable(cwd .. "/.venv/Scripts/pythonw.exe") == 1 then
-								return pythonpath
-							else
-								-- Please modify your code here to auto-select initial program
-								local current_env_python = os.getenv('CONDA_DEFAULT_ENV')
-								return "C:\\Users\\wilsonchen\\AppData\\Local\\anaconda3\\envs\\" .. current_env_python .. "\\python.exe"
-							end
-						end,
+						command = terminal_path,
+						pythonPath = pythonpath,
+						-- pythonPath = function()
+						-- 	-- debugpy supports launching an application with a different interpreter then the one used to launch debugpy itself.
+						-- 	-- The code below looks for a `venv` or `.venv` folder in the current directly and uses the python within.
+						-- 	-- You could adapt this - to for example use the `VIRTUAL_ENV` environment variable.
+						-- 	local cwd = vim.fn.getcwd()
+						-- 	if vim.fn.executable(cwd .. "/venv/Scripts/pythonw.exe") == 1 then
+						-- 		return pythonpath
+						-- 	elseif vim.fn.executable(cwd .. "/.venv/Scripts/pythonw.exe") == 1 then
+						-- 		return pythonpath
+						-- 	else
+						-- 		-- Please modify your code here to auto-select initial program
+						-- 		local current_env_python = os.getenv('CONDA_DEFAULT_ENV')
+						-- 		return "C:\\Users\\wilsonchen\\AppData\\Local\\anaconda3\\envs\\" .. current_env_python .. "\\python.exe"
+						-- 	end
+						-- end,
 						repl_lang = "python",
 					},
 				}

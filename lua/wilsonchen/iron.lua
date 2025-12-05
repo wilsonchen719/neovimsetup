@@ -16,6 +16,9 @@ return {
 					-- end,
 					-- format = require("iron.fts.common").bracketed_paste_python
 					-- }
+					python = {
+						command = {"ipython"}
+					},
 					sh = {
 						-- kcanbe a table or a function that returns a table.
 						command = { "zsh" },
@@ -34,7 +37,7 @@ return {
 				send_until_cursor = "<leader>iu",
 				send_mark = "<leader>im",
 				mark_motion = "<leader>mc",
-				mark_visual = "<leaderd>mc",
+				mark_visual = "<leader>mv",
 				remove_mark = "<leader>md",
 				interrupt = "<leader>ip",
 				exit = "<leader>ie",

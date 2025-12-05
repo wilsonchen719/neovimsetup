@@ -1,6 +1,6 @@
 _G.isZenMode = false
 _G.isNvimDapRunning = false
-_G.zenModeWidth = 450
+_G.zenModeWidth = 300
 vim.g.mapleader = " "
 vim.g.have_nerd_font = true
 vim.g.conform_black_options = "--line-length 120"
@@ -9,8 +9,8 @@ if vim.g.neovide then
 	local alpha = function()
 		return string.format("%x", math.floor((255 * vim.g.transparency) or 0.9))
 	end
-	vim.o.guifont = "FiraCode Nerd Font:h12"
-	-- vim.o.guifont = "JetBrainsMonoNL Nerd Font:h12"
+	-- vim.o.guifont = "FiraCode Nerd Font:h12"
+	vim.o.guifont = "JetBrainsMono Nerd Font Mono:h12"
 	vim.g.neovide_transparency = 0.8
 	vim.g.transparency = 0.5
 	vim.g.neovide_background_color = "#0f1117" .. alpha()
@@ -28,9 +28,8 @@ if vim.g.neovide then
 	vim.api.nvim_set_keymap("i", "<c-v>", "<c-r>+", { noremap = true })
 	vim.api.nvim_set_keymap("c", "<c-v>", "<c-r>+", { noremap = true })
 else
-  vim.opt.guicursor = "n-v-i-c:block-Cursor"
+	vim.opt.guicursor = "n-v-i-c:block-Cursor"
 end
-
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -49,7 +48,6 @@ vim.opt.wrap = false
 vim.opt.conceallevel = 2
 vim.o.swapfile = false
 
-
 -- Fat Cursor
 
 -- Stop autoindenting next line.
@@ -62,16 +60,17 @@ vim.opt.formatoptions = "cro" -- Auto-wrap comments using textwidth
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = "a"
-vim.opt.shell = "C:/Users/wilsonchen/AppData/Local/Microsoft/WindowsApps/Microsoft.PowerShell_8wekyb3d8bbwe/pwsh.exe"
-vim.opt.shell = "pwsh"
-vim.opt.shellcmdflag = "-nologo -noprofile -ExecutionPolicy RemoteSigned -command"
+vim.opt.shell = "C:/Users/wilsonchen/AppData/Local/Programs/nu/bin/nu.exe"
+-- How Nushell should run commands
+vim.opt.shellcmdflag = "-c"
+-- Nushell does not need quotes for expansions
+vim.opt.shellquote = ""
 vim.opt.shellxquote = ""
-
-
--- vim.opt.shell = "C:/Users/wilsonchen/AppData/Local/Programs/nu/bin/nu.exe"
--- vim.o.shellcmdflag = '-c'
--- vim.o.shellquote = ''
--- vim.o.shellxquote = ''
+--
+-- vim.opt.shell = "C:/Users/wilsonchen/AppData/Local/Microsoft/WindowsApps/Microsoft.PowerShell_8wekyb3d8bbwe/pwsh.exe"
+-- vim.opt.shell = "pwsh"
+-- vim.opt.shellcmdflag = "-nologo -noprofile -ExecutionPolicy RemoteSigned -command"
+-- vim.opt.shellxquote = ""
 
 -- Don't show the mode, since it's already in the status line
 vim.opt.showmode = false
@@ -129,11 +128,12 @@ vim.opt.scrolloff = 10
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
 vim.opt.hlsearch = true
 vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
+vim.keymap.set("n", "<leader>pa", "<cmd>PyrightSetPythonPath .venv/Scripts/python.exe<CR>")
 
 -- Diagnostic keymaps
 vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Go to previous [D]iagnostic message" })
 vim.keymap.set("n", "\\d", vim.diagnostic.goto_next, { desc = "Go to next [D]iagnostic message" })
-vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Show diagnostic [E]rror messages" })
+vim.keymap.set("n", "<leader>w", vim.diagnostic.open_float, { desc = "Show diagnostic [E]rror messages" })
 vim.keymap.set("n", "Q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
 
 -- Keymaps to jump between buffers.
@@ -147,11 +147,10 @@ vim.keymap.set("n", "Q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q
 
 vim.keymap.set("n", "<leader>a", function()
 	vim.cmd("w")
-  local old_buf = vim.api.nvim_get_current_buf()
-  vim.cmd("bnext")
-  vim.cmd('bdelete ' .. old_buf)
+	local old_buf = vim.api.nvim_get_current_buf()
+	vim.cmd("bnext")
+	vim.cmd("bdelete " .. old_buf)
 end, { desc = "" })
-
 
 -- Keymaps
 
@@ -173,6 +172,7 @@ end
 -- Easiest Way to Escape Insert Mode.
 -- Use jk to escape insert mode
 vim.keymap.set("i", "jk", "<ESC>", { noremap = true, silent = true })
+vim.keymap.set("i", "JK", "<ESC>", { noremap = true, silent = true })
 vim.keymap.set("t", "jk", "<C-\\><C-n>", { noremap = true, silent = true })
 vim.keymap.set("t", "<ESC>", "<C-\\><C-n>", { noremap = true, silent = true })
 
@@ -184,6 +184,8 @@ vim.keymap.set("t", "<ESC>", "<C-\\><C-n>", { noremap = true, silent = true })
 --File Navigation Modification, center
 vim.keymap.set("n", "<C-u>", "<C-u>zz")
 vim.keymap.set("n", "<C-d>", "<C-d>zz")
+-- Adding save on ctrl-s
+vim.keymap.set("n", "<C-s>", "<cmd>w<CR>")
 vim.keymap.set("n", "n", "nzzzv")
 vim.keymap.set("n", "N", "Nzzzv")
 vim.keymap.set("x", "p", '"_dP') -- Paste without yanking
@@ -367,7 +369,6 @@ require("lazy").setup({
 					font = "+4", -- font size increment
 				},
 				-- this will change the font size on alacritty when in zen mode
-        -- asdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdffasdfasdfasdfas
 				-- requires  Alacritty Version 0.10.0 or higher
 				-- uses `alacritty msg` subcommand to change font size
 				alacritty = {
@@ -418,8 +419,8 @@ require("lazy").setup({
 			})
 			require("notify").setup({
 				background_colour = "#000000",
-        max_width = 30,
-        max_height = 20,
+				max_width = 30,
+				max_height = 20,
 				-- on_open = function(win)
 				-- 	vim.api.nvim_win_set_config(win, { focusable = false })
 				-- end,
@@ -610,34 +611,34 @@ require("lazy").setup({
 						prompt_position = "top",
 					},
 					sorting_strategy = "ascending",
-          file_ignore_patterns = {
-            "%.git/",         -- Git directory
-            "%.jpg",          -- JPEG images
-            "%.jpeg",         -- JPEG images
-            "%.png",          -- PNG images
-            "%.bmp",          -- Bitmap images
-            "%.gif",          -- GIF images
-            "%.svg",          -- SVG images
-            "%.ico",          -- Icon files
-            "%.zip",          -- ZIP archives
-            "%.tar",          -- TAR archives
-            "%.tar.gz",       -- TAR.GZ archives
-            "%.rar",          -- RAR archives
-            "%.exe",          -- Executable files
-            "%.dll",          -- DLL files
-            "%.bin",          -- Binary files
-            "%.obj",          -- Object files
-            "%.o",            -- Object files
-            "%.so",           -- Shared object files
-            "%.dylib",        -- Dynamic library files
-            "%.class",        -- Java class files
-            "%.jar",          -- Java JAR files
-            "%.pyc",          -- Python compiled files
-            "%.pyo",          -- Python optimized files
-            "%.DS_Store",     -- macOS system files
-            "thumbs.db"       -- Windows thumbnail cache
-          }
-        },
+					file_ignore_patterns = {
+						"%.git/", -- Git directory
+						"%.jpg", -- JPEG images
+						"%.jpeg", -- JPEG images
+						"%.png", -- PNG images
+						"%.bmp", -- Bitmap images
+						"%.gif", -- GIF images
+						"%.svg", -- SVG images
+						"%.ico", -- Icon files
+						"%.zip", -- ZIP archives
+						"%.tar", -- TAR archives
+						"%.tar.gz", -- TAR.GZ archives
+						"%.rar", -- RAR archives
+						"%.exe", -- Executable files
+						"%.dll", -- DLL files
+						"%.bin", -- Binary files
+						"%.obj", -- Object files
+						"%.o", -- Object files
+						"%.so", -- Shared object files
+						"%.dylib", -- Dynamic library files
+						"%.class", -- Java class files
+						"%.jar", -- Java JAR files
+						"%.pyc", -- Python compiled files
+						"%.pyo", -- Python optimized files
+						"%.DS_Store", -- macOS system files
+						"thumbs.db", -- Windows thumbnail cache
+					},
+				},
 				-- pickers = {
 				-- 	{
 				-- 		layout_config = {
@@ -665,17 +666,17 @@ require("lazy").setup({
 			end, { desc = "[S]earch [F]iles" })
 			--vim.keymap.set("n", "<leader>ss", builtin.builtin, { desc = "[S]earch [S]elect Telescope" })
 			-- vim.keymap.set("n", "<leader>sw", builtin.grep_string, { desc = "[S]earch current [W]ord" })
-      -- I will user buffer manager to manage my buffer going forward.
-      --
+			-- I will user buffer manager to manage my buffer going forward.
+			--
 			-- vim.keymap.set("n", "<leader>sb", builtin.buffers, { desc = "[S]earch by [B]uffers" })
 			vim.keymap.set("n", "<leader>sg", builtin.live_grep, { desc = "[S]earch by [G]rep" })
-			vim.keymap.set("n", "<leader>sd", builtin.diagnostics, { desc = "[S]earch [D]iagnostics" })
+			-- vim.keymap.set("n", "<leader>sd", builtin.diagnostics, { desc = "[S]earch [D]iagnostics" })
 			vim.keymap.set("n", "<leader>sr", builtin.resume, { desc = "[S]earch [R]esume" })
 			vim.keymap.set("n", "<leader>s.", function()
 				builtin.oldfiles()
 				-- require("harpoon"):list():add()
 			end, { desc = "[S]earch [F]iles" })
-			vim.keymap.set("n", "<leader>ss", builtin.lsp_document_symbols, { desc = "[S]earch [S]ymbols" })
+			vim.keymap.set("n", "<leader>sd", builtin.lsp_document_symbols, { desc = "[S]earch [S]ymbols" })
 			-- Slightly advanced example of overriding default behavior and theme
 			vim.keymap.set("n", "<leader>/", function()
 				-- You can pass additional configuration to Telescope to change the theme, layout, etc.
@@ -914,7 +915,7 @@ require("lazy").setup({
 		"neovim/nvim-lspconfig",
 		dependencies = {
 			-- Automatically install LSPs and related tools to stdpath for Neovim
-      {"williamboman/mason.nvim", config = true},
+			{ "williamboman/mason.nvim", config = true },
 			"williamboman/mason-lspconfig.nvim",
 			"WhoIsSethDaniel/mason-tool-installer.nvim",
 
@@ -925,7 +926,7 @@ require("lazy").setup({
 			-- `neodev` configures Lua LSP for your Neovim config, runtime and plugins
 			-- used for completion, annotations and signatures of Neovim apis
 			{ "folke/neodev.nvim", opts = {} },
-      { "hrsh7th/cmp-nvim-lsp" }
+			{ "hrsh7th/cmp-nvim-lsp" },
 		},
 		config = function()
 			-- Brief aside: **What is LSP?**
@@ -987,14 +988,13 @@ require("lazy").setup({
 						vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
 							buffer = event.buf,
 							callback = vim.lsp.buf.document_highlight,
-					       })
+						})
 
 						vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
 							buffer = event.buf,
 							callback = vim.lsp.buf.clear_references,
 						})
 					end
-
 				end,
 			})
 
@@ -1206,8 +1206,9 @@ require("lazy").setup({
 				merge_keywords = true,
 				keywords = {
 					CELL = { icon = "⚡", color = "hint" },
-					CONSTRAINT = { icon = "🔒", color = "warning", alt = {"CONST", "Constraint"} },
-					OBJECTIVE = { icon = "🎯", color = "info" , alt = {"OBJ","Objective"} },
+					CONSTRAINT = { icon = "🔒", color = "warning", alt = { "CONST", "Constraint" } },
+					OBJECTIVE = { icon = "🎯", color = "info", alt = { "OBJ", "Objective" } },
+					CHECK = { icon = "🐛", color = "test", alt = { "CHECK", "Check" } },
 				},
 				-- signs = true, -- show icons in the signs column
 				-- sign_priority = 8, -- sign priority
@@ -1250,14 +1251,14 @@ require("lazy").setup({
 				-- },
 				-- -- list of named colors where we try to extract the guifg from the
 				-- -- list of highlight groups or use the hex color if hl not found as a fallback
-				-- colors = {
-				-- 	error = { "DiagnosticError", "ErrorMsg", "#DC2626" },
-				-- 	warning = { "DiagnosticWarn", "WarningMsg", "#FBBF24" },
-				-- 	info = { "DiagnosticInfo", "#2563EB" },
-				-- 	hint = { "DiagnosticHint", "#10B981" },
-				-- 	default = { "Identifier", "#7C3AED" },
-				-- 	test = { "Identifier", "#FF00FF" },
-				-- },
+				colors = {
+					error = { "DiagnosticError", "ErrorMsg", "#DC2626" },
+					warning = { "DiagnosticWarn", "WarningMsg", "#FBBF24" },
+					info = { "DiagnosticInfo", "#2563EB" },
+					hint = { "DiagnosticHint", "#10B981" },
+					default = { "Identifier", "#7C3AED" },
+					test = { "Identifier", "#FF00FF" },
+				},
 				-- search = {
 				-- 	command = "rg",
 				-- 	args = {
@@ -1449,6 +1450,7 @@ require("lazy").setup({
 							-- local sn = ls.snippet_node
 							local t = ls.text_node
 							local i = ls.insert_node
+              local rep = require("luasnip.extras").rep
 							-- local f = ls.function_node
 							-- local c = ls.choice_node
 							-- local d = ls.dynamic_node
@@ -1483,35 +1485,106 @@ require("lazy").setup({
 									i(1, "Df"),
 									t(")"),
 								}),
-                s("col", {
-                  t({"print("}),
-                  i(1, "df_name"),
-                  t({".columns)"}),
-                }),
-                s("dtype", {
-                  t({"print("}),
-                  i(1, "df_name"),
-                  t({".dtypes)"}),
-                }),
-                s("head", {
-                  t({"print("}),
-                  i(1, "df_name"),
-                  t({".head("}),
-                  i(2, "row number"),
-                  t({"))"}),
-                }),
-                s("type", {
-                  t({"print(type("}),
-                  i(1, "var"),
-                  t({")"}),
-                }),
-                s("relationship", {
-                  t({"relationship (\""}),
-                  i(1, "ClassName"),
-                  t({"\", back_populates=\""}),
-                  i(2, "ClassAttr"),
-                  t({"\",cascade=\"all, delete-orphan\")"}),
-                }),
+								s("col", {
+									t({ "print(" }),
+									i(1, "df_name"),
+									t({ ".columns)" }),
+								}),
+								s("dtype", {
+									t({ "print(" }),
+									i(1, "df_name"),
+									t({ ".dtypes)" }),
+								}),
+								s("head", {
+									t({ "print(" }),
+									i(1, "df_name"),
+									t({ ".head(" }),
+									i(2, "row number"),
+									t({ "))" }),
+								}),
+								s("type", {
+									t({ "print(type(" }),
+									i(1, "var"),
+									t({ "))" }),
+								}),
+								s("relationship", {
+									t({ 'relationship ("' }),
+									i(1, "ClassName"),
+									t({ '", back_populates="' }),
+									i(2, "ClassAttr"),
+									t({ '",cascade="all, delete-orphan")' }),
+								}),
+								s("st_aggrid", {
+									t({ "from st_aggrid import AgGrid, GridOptionsBuilder, DataReturnMode" }),
+								}),
+								s("gridoption", {
+									t({ "gb = GridOptionsBuilder.from_dataframe(df)", "" }),
+									t(
+                    {"gb.configure_default_column(groupable=True, value=True, enableRowGroup=True, aggFunc='sum', editable=True, autoHeight=True, cellStyle={'white-space': 'pre'}, minWidth=100, flex=1, filterParams={'applyMiniFilterWhileTyping': True}, filter='agTextColumnFilter', floatingFilter=True)", ""}
+									),
+                  t(
+                    {"gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=30)", ""}
+                  ),
+                  t(
+                    {'gb.configure_grid_options(autoGroupColumnDef={"headerName": "Group", "cellRenderer": "agGroupCellRenderer", "cellStyle": {"border-right": "2px solid lightgrap", "pinned": "left"}}, undoRedoCellEditing=True,enableRangeSelection=True,groupDefaultExpaneded=1, rowGroupPanelShow="always", suppressAggFuncInHeader=True,suppressGroupRowsSticky=True, rowSelection= {"mode": "multiRow", "checkboxes": False, "enableClickSelection": True})', ""}
+                  ),
+                  t(
+                    {"gb.configure_column('', cellEditor='agRichSelectCellEditor',cellEditorParams={'values':})", ""}
+                  ),
+                  t(
+                    {"grid_options = gb.build()", ""}
+                  ),
+                  t({ "data = AgGrid(df, height=600, gridOptions=grid_options, autosizeStrategy='fitCellContents', allow_unsafe_jscode=True, data_return_mode = DataReturnMode.AS_INPUT)" })
+								}),
+								s("LATIN_CS", {
+									t({ "LATIN1_General_CS_AS" }),
+								}),
+								s("LATIN_UTF", {
+									t({ "Latin1_General_100_CS_AS_SC_UTF8" }),
+								}),
+								s("config_str", {
+									t({ 'gb.configure_column(', '' }),
+                  i(1, 'column_name'),
+									t({ ',editable=True,', '' }),
+									t({ 'wrapText=True,', '' }),
+									t({ 'autoHeight=True', '' }),
+                  t({ 'cellStyle={"white-space": "pre"},', ''}),
+                  t({ 'cellEditor="agTextCellEditor",', ''}),
+                  t({ 'filter = "agTextColumnFilter",', ''}),
+                  t({ 'filterParams={"applyMiniFilterWhileTyping": True},', ''}),
+                  t({ 'floatingFilter=True,', ''}),
+                  t({ ')', ''}),
+								}),
+								s("config_num", {
+									t({ 'gb.configure_column(', '' }),
+                  i(1, 'column_name'),
+									t({ ',editable=True,', '' }),
+                  t({ 'cellEditor="agNumberCellEditor",', ''}),
+                  t({ ')', ''}),
+								}),
+								s("config_bool", {
+									t({ 'gb.configure_column(', '' }),
+                  i(1, 'column_name'),
+									t({ ',editable=True,', '' }),
+                  t({ 'cellEditor="agCheckboxCellRenderer",', ''}),
+                  t({ ')', ''}),
+								}),
+								s("config_date", {
+									t({ 'gb.configure_column(', '' }),
+                  i(1, 'column_name'),
+									t({ ',editable=True,', '' }),
+                  t({ 'cellEditor="CellEditor.StringDateSelector",', ''}),
+                  t({ ')', ''}),
+								}),
+								s("config_enum", {
+									t({ 'gb.configure_column(', '' }),
+                  i(1, 'column_name'),
+									t({ ',editable=True,', '' }),
+                  t({ 'cellEditor="CellEditor.RichSelector",', ''}),
+                  t({ 'cellEditorParams={"values": enum_options},', ''}),
+                  t({ ')', ''}),
+								}),
+
 							})
 							require("luasnip").add_snippets("lua", {
 								s("config", {
@@ -1524,9 +1597,9 @@ require("lazy").setup({
 					},
 				},
 			},
-      -- Adds other completion capabilities.
-      --  nvim-cmp does not ship with all sources by default. They are split
-      --  into multiple repos for maintenance purposes.
+			-- Adds other completion capabilities.
+			--  nvim-cmp does not ship with all sources by default. They are split
+			--  into multiple repos for maintenance purposes.
 			"saadparwaiz1/cmp_luasnip",
 			"hrsh7th/cmp-nvim-lsp",
 			"hrsh7th/cmp-path",
@@ -1655,57 +1728,56 @@ require("lazy").setup({
 					},
 				},
 			})
-      -- Setting up auto completion for sql files
-      cmp.setup.filetype({"sql"}, {
-        sources = {
-          {name = "vim-dadbod-completion"},
-          {name = "buffer"}
-        }
-      })
+			-- Setting up auto completion for sql files
+			cmp.setup.filetype({ "sql" }, {
+				sources = {
+					{ name = "vim-dadbod-completion" },
+					{ name = "buffer" },
+				},
+			})
 		end,
 	},
-  -- Couldn't get this working as well....
-  {
-    "ray-x/lsp_signature.nvim",
-    opts = {},
-    config = function()
-      local cfg = {
-          bind = true,
-          doc_lines = 2,
-          floating_window = true,
-          hint_enable = true,
-          hint_prefix = " ",
-          hint_scheme = "String",
-          use_lspsaga = false,
-          handler_opts = { border = "single" },
-          decorator = {"`", "`"}
-      }
-      require("lsp_signature").on_attach(cfg)
-    end,
-    --   vim.api.nvim_create_autocmd("LspAttach", {
-    --     callback = function(args)
-    --       local bufnr = args.buf
-    --       local client = vim.lsp.get_client_by_id(args.client_id)
-    --       if vim.tbl_contains({"null-ls"}, client.name) then -- blacklist lsp
-    --         return
-    --       end
-    --       require("lsp_signature").on_attach({
-    --         bind = true,
-    --         handler_opts = {
-    --           border = "rounded",
-    --         },
-    --         hint_enable = true,
-    --         hint_prefix = " ",
-    --         hint_scheme = "String",
-    --         use_lspsaga = false,
-    --         z_index = 50,
-    --       }, bufnr)
-    --     end
-    --   })
-    -- end
-
-  },
-	{ "kmontocam/nvim-conda" },
+	-- Couldn't get this working as well....
+	{
+		"ray-x/lsp_signature.nvim",
+		opts = {},
+		config = function()
+			local cfg = {
+				bind = true,
+				doc_lines = 2,
+				floating_window = true,
+				hint_enable = true,
+				hint_prefix = " ",
+				hint_scheme = "String",
+				use_lspsaga = false,
+				handler_opts = { border = "single" },
+				decorator = { "`", "`" },
+			}
+			require("lsp_signature").on_attach(cfg)
+		end,
+		--   vim.api.nvim_create_autocmd("LspAttach", {
+		--     callback = function(args)
+		--       local bufnr = args.buf
+		--       local client = vim.lsp.get_client_by_id(args.client_id)
+		--       if vim.tbl_contains({"null-ls"}, client.name) then -- blacklist lsp
+		--         return
+		--       end
+		--       require("lsp_signature").on_attach({
+		--         bind = true,
+		--         handler_opts = {
+		--           border = "rounded",
+		--         },
+		--         hint_enable = true,
+		--         hint_prefix = " ",
+		--         hint_scheme = "String",
+		--         use_lspsaga = false,
+		--         z_index = 50,
+		--       }, bufnr)
+		--     end
+		--   })
+		-- end
+	},
+	-- { "kmontocam/nvim-conda" },
 	-- "ubaldot/vim-conda-activate",
 	{
 		"danymat/neogen",
@@ -1781,12 +1853,11 @@ require("lazy").setup({
 	require("wilsonchen.undo"),
 	require("wilsonchen.outline"),
 	require("wilsonchen.troublemaker"),
-  require("wilsonchen.refactor"),
-  -- require("wilsonchen.harpoon"),
-  require("wilsonchen.dadbod"),
-  require("wilsonchen.bufdel"),
-  require("wilsonchen.buffermanager")
-
+	require("wilsonchen.refactor"),
+	-- require("wilsonchen.harpoon"),
+	require("wilsonchen.dadbod"),
+	require("wilsonchen.bufdel"),
+	require("wilsonchen.buffermanager"),
 
 	-- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
 	--    This is the easiest way to modularize your config.
@@ -1817,11 +1888,11 @@ require("lazy").setup({
 })
 -- Setting up colortheme.
 vim.cmd.colorscheme("catppuccin-macchiato")
-vim.cmd [[highlight Normal ctermbg=none guibg=none]]
-vim.cmd [[highlight NonText ctermbg=none guibg=none]]
-vim.cmd [[highlight LineNr ctermbg=none guibg=none]]
-vim.cmd [[highlight Folded ctermbg=none guibg=none]]
-vim.cmd [[highlight EndOfBuffer ctermbg=none guibg=none]]
+vim.cmd([[highlight Normal ctermbg=none guibg=none]])
+vim.cmd([[highlight NonText ctermbg=none guibg=none]])
+vim.cmd([[highlight LineNr ctermbg=none guibg=none]])
+vim.cmd([[highlight Folded ctermbg=none guibg=none]])
+vim.cmd([[highlight EndOfBuffer ctermbg=none guibg=none]])
 
 -- vim.cmd.colorscheme("vague")
 -- vim.api.nvim_set_hl(0, "Normal", { bg = "none" })

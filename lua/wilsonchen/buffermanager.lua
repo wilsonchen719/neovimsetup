@@ -13,7 +13,7 @@ return {
 		-- Setting up keymaps
 		vim.keymap.set(
 			"n",
-			"<leader>sb",
+			"<leader>e",
 			function()
 				require("buffer_manager.ui").toggle_quick_menu()
 			end,
